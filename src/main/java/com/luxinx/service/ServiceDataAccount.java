@@ -129,4 +129,9 @@ public interface ServiceDataAccount {
      * @param yyyy 年度
      */
     List<String> everymonth(String yyyy);
+
+    /**
+     * 判断是否是法定假日
+     */
+    boolean isBeakDay();
 }

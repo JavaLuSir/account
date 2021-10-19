@@ -2,6 +2,7 @@ package com.luxinx.cron;
 
 import com.alibaba.fastjson.JSONObject;
 import com.luxinx.service.ServiceDataAccount;
+import com.luxinx.util.DateUtil;
 import com.luxinx.util.HttpUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,6 +37,10 @@ public class Tzcrond {
     //或直接指定时间间隔，例如：5秒
     //@Scheduled(fixedRate = 10000)
     public void configureTaskFund() {
+        //如果休息日不执行定时任务
+        if(serviceDataAccount.isBeakDay()){
+           return;
+        }
         //更新投资账户金额
         updateTouziInfo();
         //更新账户变动资金流水
@@ -45,7 +50,7 @@ public class Tzcrond {
 
 
     private void updateAccountInfo() {
-        List<Map<String, Object>> moneylist = serviceDataAccount.queryTodayTouziMoney(getLastDate());
+        List<Map<String, Object>> moneylist = serviceDataAccount.queryTodayTouziMoney(DateUtil.getLastDate());
 
         for (Map<String, Object> m : moneylist) {
             String aid = m.get("AID") + "";
@@ -54,7 +59,7 @@ public class Tzcrond {
             if (trnum == 0) {
                 continue;
             }
-            String todayDateStr = getTodayDate();
+            String todayDateStr = DateUtil.getTodayDate();
             Map<String, String> param = new HashMap<>();
             param.put("AID", aid);
             param.put("TRDATE", todayDateStr);
@@ -78,16 +83,16 @@ public class Tzcrond {
 
             serviceDataAccount.addDetail(param);
         }
-        serviceDataAccount.updateTouziTime(getTodayDate());
+        serviceDataAccount.updateTouziTime(DateUtil.getTodayDate());
 
 
     }
 
     private void updateTouziInfo() {
         //获取上个交易日期
-        String lastDateStr = getLastDate();
+        String lastDateStr = DateUtil.getLastDate();
         //获取当天交易日期
-        String todayDateStr = getTodayDate();
+        String todayDateStr = DateUtil.getTodayDate();
         //更新股票收益信息
         updateStockInfo(lastDateStr, todayDateStr);
         //更新基金收益信息
@@ -98,7 +103,7 @@ public class Tzcrond {
         List<Map<String, Object>> touziacc = serviceDataAccount.queryTouziInfo("1");
         for (Map<String, Object> m : touziacc) {
             {
-                //获取基金编码/股票代码
+                //股票代码
                 String tcode = m.get("TCODE") + "";
                 String aid = m.get("AID") + "";
 
@@ -129,7 +134,7 @@ public class Tzcrond {
         List<Map<String, Object>> touziacc = serviceDataAccount.queryTouziInfo("2");
         for (Map<String, Object> m : touziacc) {
             try {
-                //获取基金编码/股票代码
+                //获取基金编码
                 String tcode = m.get("TCODE") + "";
                 String aid = m.get("AID") + "";
                 //获取上日请求的URL
@@ -153,39 +158,14 @@ public class Tzcrond {
         }
     }
 
-    /**
-     * 获取上个交易日的基金净值如果当天为周一获取周日时间
-     *
-     * @return dateStr yyyy-mm-dd
-     */
-    private String getLastDate() {
-        String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date dt = new Date();
-        Calendar cd = Calendar.getInstance();
-        cd.setTime(dt);
-        String wk = weeks[cd.get(Calendar.DAY_OF_WEEK) - 1];
-        if (wk.equals("星期一")) {
-            cd.add(Calendar.DATE, -3);
-        } else {
-            cd.add(Calendar.DATE, -1);
-        }
-        return sdf.format(cd.getTime());
-    }
 
-    private String getTodayDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date dt = new Date();
-        return sdf.format(dt);
-    }
 
     private String getPrice(String urlStr) {
         try {
-            Thread.sleep(200);//防止过快请求
+            Thread.sleep(500);//防止过快请求
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(urlStr);
         String r = null;
         try {
             r = HttpUtil.post(urlStr, null, "");
@@ -208,7 +188,7 @@ public class Tzcrond {
     }
 
     private String paddingStockURL(String tcode) {
-        return "https://data.gtimg.cn/flashdata/hushen/daily/" + getTodayDate().substring(2, 4) + "/" + tcode + ".js";
+        return "https://data.gtimg.cn/flashdata/hushen/daily/" + DateUtil.getTodayDate().substring(2, 4) + "/" + tcode + ".js";
     }
 
     /**
@@ -272,8 +252,8 @@ public class Tzcrond {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String lastday = getLastDate().substring(2).replaceAll("-", "");
-        String today = getTodayDate().substring(2).replaceAll("-", "");
+        String lastday = DateUtil.getLastDate().substring(2).replaceAll("-", "");
+        String today = DateUtil.getTodayDate().substring(2).replaceAll("-", "");
         Map<String, String> resultmap = new HashMap<>();
         String pricelast = "";
         if (result.contains(lastday)) {
@@ -283,12 +263,12 @@ public class Tzcrond {
         for (String s : pricearry) {
             if (s.startsWith(lastday)) {
                 String[] w = s.split(" ");
-                resultmap.put(getLastDate(), w[2]);
+                resultmap.put(DateUtil.getLastDate(), w[2]);
 
             }
             if (s.startsWith(today)) {
                 String[] d = s.split(" ");
-                resultmap.put(getTodayDate(), d[2]);
+                resultmap.put(DateUtil.getTodayDate(), d[2]);
             }
         }
         return resultmap;

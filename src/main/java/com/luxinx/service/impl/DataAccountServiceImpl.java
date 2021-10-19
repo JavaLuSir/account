@@ -3,6 +3,7 @@ package com.luxinx.service.impl;
 import com.luxinx.bean.BeanAccount;
 import com.luxinx.bean.BeanWater;
 import com.luxinx.service.ServiceDataAccount;
+import com.luxinx.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.*;
@@ -293,6 +294,23 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
             values.add(value);
         }
         return values;
+    }
+
+    @Override
+    public boolean isBeakDay() {
+        String todayStr = DateUtil.getTodayDate();
+        String quersql = "SELECT ID FROM T_HOLIDAY WHERE BREAKDAY=:datestr";
+        NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
+        MapSqlParameterSource param = new MapSqlParameterSource();
+        param.addValue("datestr", todayStr);
+        Map<String, Object> rstmap = null;
+        try {
+            rstmap = npjt.queryForMap(quersql, param);
+        } catch (Exception e){
+            System.out.println();
+        }
+
+        return rstmap != null;
     }
 
     /**

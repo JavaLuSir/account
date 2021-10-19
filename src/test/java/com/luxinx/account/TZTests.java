@@ -2,6 +2,7 @@ package com.luxinx.account;
 
 import com.luxinx.cron.Tzcrond;
 import com.luxinx.service.ServiceDataAccount;
+import com.luxinx.service.impl.DataAccountServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,15 @@ class TZTests {
 
     @Autowired
     private Tzcrond tzcrond;
-
+    @Autowired
+    private ServiceDataAccount dataAccountService;
     @Test
     public void testCrond(){
         tzcrond.configureTaskFund();
+    }
+
+    @Test
+    public void testHoliday(){
+        System.out.println(dataAccountService.isBeakDay());
     }
 }
