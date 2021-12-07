@@ -128,4 +128,14 @@ public class HttpUtil {
         return sbf.toString();
     }
 
+    static class Test {
+        boolean foo(char c){
+            System.out.println(c);
+            return true;
+        }
+    }
+
+    public static void main(String[] args) {
+
+    }
 }

@@ -159,11 +159,17 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<Map<String, Object>> queryYearReport(String datestr) {
-        String sql = "SELECT sum(TRNUM) CASH,  CASE  TRADEKIND WHEN 10 THEN '居家'WHEN 20 THEN '食品' WHEN 30 THEN '交通' WHEN 40 THEN '投资' WHEN 50 THEN '还款' WHEN 61 THEN '工资' WHEN 71 THEN '投资收益' WHEN 81 THEN '其他收益'WHEN 90 THEN '投资亏损' END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND ";
+        List<Map<String, Object>> kindList = queryKind();
+        StringBuffer querysql = new StringBuffer("SELECT sum(TRNUM) CASH,  CASE  TRADEKIND ");
+        for(Map m:kindList){
+            querysql.append("WHEN "+m.get("VALUE")+" THEN '"+m.get("TEXT")+"'");
+        }
+        querysql.append(" END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND");
+        //String sql = "SELECT sum(TRNUM) CASH,  CASE  TRADEKIND WHEN 10 THEN '居家'WHEN 20 THEN '食品' WHEN 30 THEN '交通' WHEN 40 THEN '投资' WHEN 50 THEN '还款' WHEN 61 THEN '工资' WHEN 71 THEN '投资收益' WHEN 81 THEN '其他收益'WHEN 90 THEN '投资亏损' END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND ";
         NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("datestr", datestr);
-        List<Map<String, Object>> result = npjt.queryForList(sql, param);
+        List<Map<String, Object>> result = npjt.queryForList(querysql.toString(), param);
         for (Map<String, Object> m : result) {
             if (m.get("TRADEKIND").equals("还款")) {
                 BigDecimal bcm = new BigDecimal(m.get("CASH") + "");
@@ -356,7 +362,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
             //目标账户减
             toBalnaceResult = dbTomoney.add(money);
             //原始账号减
-            fromBanalceResult = dbfrommoney.add(money);
+            fromBanalceResult = dbfrommoney.add(money); 
 
         } else if (fromProp.equals("2") && toProp.equals("2")) {//原账户负债。目标账户也是负债
             //目标账户减

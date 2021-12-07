@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
+import java.util.Map;
+
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -26,5 +29,11 @@ class TZTests {
     @Test
     public void testHoliday(){
         System.out.println(dataAccountService.isBeakDay());
+    }
+
+    @Test
+    public void testQueryYearReport(){
+        List<Map<String, Object>> rst = dataAccountService.queryYearReport("2021");
+        System.out.println(rst);
     }
 }
