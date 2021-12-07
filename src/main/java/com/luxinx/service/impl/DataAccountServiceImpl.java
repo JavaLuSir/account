@@ -171,7 +171,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         param.addValue("datestr", datestr);
         List<Map<String, Object>> result = npjt.queryForList(querysql.toString(), param);
         for (Map<String, Object> m : result) {
-            if (m.get("TRADEKIND").equals("还款")) {
+            if (m.get("TRADEKIND").equals("还房贷")) {
                 BigDecimal bcm = new BigDecimal(m.get("CASH") + "");
                 BigDecimal huankuan = bcm.divide(new BigDecimal(2));
                 m.put("CASH", huankuan.floatValue());
