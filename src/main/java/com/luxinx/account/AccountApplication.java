@@ -12,8 +12,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * 它位于 com.luxinx.account 包中。
  * 该类使用了多个 Spring Boot 注解来配置应用程序。
  */
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @ComponentScan(basePackages = {"com.luxinx.**.service","com.luxinx.**.controller","com.luxinx.config","com.luxinx.cron"})
 public class AccountApplication {
 
