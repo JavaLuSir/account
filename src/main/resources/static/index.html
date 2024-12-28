@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta charset="utf-8">
+    <title>账本</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!--标准mui.css-->
+    <link rel="stylesheet" href="./css/mui.min.css">
+    <!--App自定义的css-->
+    <!--<link rel="stylesheet" type="text/css" href="../css/app.css"/>-->
+
+</head>
+<style>
+    * {
+        touch-action: pan-y;
+    }
+    .rd {
+        color: red;
+    }
+    .gr {
+        color: green;
+    }
+    .mui-pull-bottom-pocket {
+        height: 0px;
+    }
+    .acc {
+        display: inline-block;
+        width: 70px;
+    }
+    .sp {
+        margin-left:0px;
+        margin-right:4px;
+    }
+    .dt {
+        display: inline-block;
+        width:40px;
+    }
+    .rk{
+        display: inline-block;
+        margin-left: 4px;
+    }
+</style>
+<body>
+<header class="mui-bar mui-bar-nav">
+    <h1 class="mui-title">账本信息</h1>
+</header>
+<div id="container" class="mui-content">
+
+</div>
+<!------------------------------------------>
+<nav class="mui-bar mui-bar-tab">
+    <a class="mui-tab-item" href="./account.html">
+        <span class="mui-icon mui-icon-list"></span>
+        <span class="mui-tab-label">账户</span>
+    </a>
+
+    <a class="mui-tab-item" href="./calc.html">
+        <span class="mui-icon mui-icon-paperclip"></span>
+        <span class="mui-tab-label">统计</span>
+    </a>
+
+    <a class="mui-tab-item" href="./add.html">
+        <span class="mui-icon mui-icon-plus"></span>
+        <span class="mui-tab-label">记账</span>
+    </a>
+
+    <a class="mui-tab-item" href="./setting.html">
+        <span class="mui-icon mui-icon-gear"></span>
+        <span class="mui-tab-label">设置</span>
+    </a>
+</nav>
+<script src="cordova.js"></script>
+<script src="./js/mui.min.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/jQuery.min.js"></script>
+
+<script>
+    var count = 0;
+    var funds_cn = "余额：";
+
+    function binddelbtn() {
+        var btnArray = ['确认', '取消'];
+        //第二个demo，向左拖拽后显示操作图标，释放后自动触发的业务逻辑
+        $('.mui-table-view-cell').on('tap', '.mui-table-view-cell', function (event) {
+            document.addEventListener("deviceready",function(){
+               navigator.vibrate(100);
+            });
+            var elem = this;
+            mui.confirm('确认删除该条记录？', '删除', btnArray, function (e) {
+
+                if (e.index === 0) {
+                    $.ajax({
+                        url: host+'/rest/deldetail',
+                        type: 'POST',
+                        data: {"id": elem.value},
+                        dataType: 'json',
+                        beforeSend:function(request){
+                            request.setRequestHeader("token",token);
+                        },
+                        success: function (result) {
+                            if (result && result.code === '0') {
+                                if (result.funds) {
+                                    $(elem).parents('.mui-active').find(".mui-navigate-right .funds").text(funds_cn + number_format(result.funds, 2, ".", ","))
+                                }
+
+                                elem.parentNode.removeChild(elem);
+                                //freshtotal();
+                                mui.toast("已删除!");
+                            } else {
+                                mui.toast("删除失败！");
+                            }
+                        },
+                        error: function () {
+                            mui.toast("网络错误");
+                        }
+
+                    })
+
+                } else {
+                    setTimeout(function () {
+                        mui.swipeoutClose(elem);
+                    }, 0);
+                }
+            });
+        });
+    }
+
+    var bindquerydetail = function () {
+        $(".mui-navigate-right").on("tap", function (e) {
+            var datestr = '';
+            var contaobj = '';
+            if (!e.target.attributes['datestr']) {
+                datestr = e.target.parentElement.getAttribute("datestr");
+                contaobj = $(e.target.parentElement)
+            } else {
+                datestr = e.target.attributes['datestr'].value;
+                contaobj = $(e.target);
+            }
+            if (contaobj.children().length > 1) {
+                return;
+            }
+            $.ajax({
+                url: host+'/rest/querymonthitem',
+                type: 'POST',
+                data: {"datestr": datestr},
+                dataType: 'json',
+                beforeSend:function(request){
+                    request.setRequestHeader("token",token);
+                },
+                success: function (result) {
+                    var accname = '';
+                    var color = '';
+                    var zhengfu = '';
+                    var strdetail = '<ul class="mui-table-view mui-table-view-chevron">';
+                    //
+                    for (var i = 0; i < result.length; i++) {
+
+                        color = result[i].trtype == 0 ? "red" : "green";
+                        zhengfu = result[i].trtype == 0 ? "-" : "+";
+
+
+                        strdetail += '<li class="mui-table-view-cell" value="' + result[i].wid + '">' +
+                            '<div class="mui-slider-right mui-disabled">' +
+                            '<a class="mui-btn mui-btn-red">删除</a>' +
+                            '</div>' +
+                            '<div class="mui-slider-handle mui-table">' +
+                            '<div style="float:left;width:120px;"><label><span class="acc">'+result[i].accname+'</span><span class="sp">|</span><span class="dt">' + new Date(result[i].trdate).Format('MM-dd') + '</span><span>:</span></label></div>' +
+                            '<div style="float:left;"><label><span class="rk">' + (result[i].remark == undefined ? "" : result[i].remark) + '</span></label></div>' +
+                            '<div style="float:right;"><span class="mui-text-right" style="color:' + color + ';">' + zhengfu + '  ' + number_format(result[i].trnum, 2, ".", ",") + '</span></div>' +
+                            '</div>' +
+                            '</li>';
+                    }
+                    strdetail += '</ul>';
+                    contaobj.append(strdetail);
+                }
+            });
+        });
+
+
+    }
+    var initData = function () {
+        var totalmoney = 0;
+
+        $.ajax({
+            url: host+'/rest/querymonth',
+            type: 'POST',
+            dataType: 'json',
+            beforeSend:function(request){
+                request.setRequestHeader("token",token);
+            },
+            success: function (result) {
+                if(!result||result.length==0){
+                    mui.toast("没有数据")
+                    return;
+                }
+                for (var i = 0; i < result.length; i++) {
+                    //设置***
+                    //拼接基本信息
+                    var cardhtml =
+                        '<div class="mui-card" style="margin: 15px 0px;">' +
+                        '<div style="text-align: right;border-bottom: 1px dotted;"><span style="color: green;margin-right: 20px;">收入：'+number_format(result[i].income, 2, ".", ",")+'</span><span style="color: red;margin-right: 20px;">支出：'+number_format(result[i].outcome, 2, ".", ",")+'</span></div>'+
+                        '<ul class="mui-table-view mui-table-view-chevron">' +
+                        '<li class="mui-table-view-cell mui-collapse">' +
+                        '<a class="mui-navigate-right" style="padding-right:35px;" href="#" datestr="' + result[i].months + '">' + result[i].months + '<span class="funds" style="float: right"> ' + funds_cn +number_format( result[i].total.toString(), 2, ".", ",") + '</span></a>' +
+
+                        '</div>';
+
+                    $("#container").append(cardhtml);
+                }
+                binddelbtn();
+                bindquerydetail();
+
+            },
+            error: function () {
+                mui.toast("网络错误");
+            }
+        })
+    }
+
+
+    $(function () {
+        initData();
+    })
+</script>
+</body>
+
+</html>

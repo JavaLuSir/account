@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <title>统计</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!--标准mui.css-->
+    <link rel="stylesheet" href="./css/mui.min.css">
+    <!--App自定义的css-->
+    <!--<link rel="stylesheet" type="text/css" href="../css/app.css"/>-->
+</head>
+<style>
+    * {
+        touch-action: pan-y;
+    }
+</style>
+<body style="height: 100%; margin: 0">
+<header class="mui-bar mui-bar-nav">
+    <h1 class="mui-title">统计</h1>
+</header>
+<div id="container" style="height:30%;width:100%;margin-left:1%;margin-top:44px;">
+</div>
+<div style="font-weight:700;margin-left:3%;">年度收益：<span id="yearearn"></span></div>
+<hr/>
+<div id="calendaritem" style="height: 85%;width:92%;margin-left:4%;padding-top:6%;">
+</div>
+<div style="font-weight:700;margin-left:3%;">
+    <span><a href="#" onclick="refreshEarn();">收益更新</a></span>
+    <span style="margin-left:40px;"> <a href="#" onclick="refreshDate();">日期重置</a></span>
+</div>
+
+<div style="font-weight:700;margin-left:3%;margin-top:40px;">月度收益:<span id="monthearn"></span></div>
+<hr/>
+<div id="baritem" style="height: 100%;width:92%;margin-left:4%;">
+</div>
+<hr/>
+<span style="font-weight:700;margin-left:3%;margin-top:40px;">每月投资净收益统计：</span>
+
+<div id="monthline" style="top:40px;margin-left:4%;height: 80%;">
+</div>
+<hr/>
+<div id="fenbu" style="top:40px;width: 92%;margin-left:4%;height: 100%;">
+
+</div>
+<!--底部菜单-->
+<nav class="mui-bar mui-bar-tab">
+    <a class="mui-tab-item" href="./index.html">
+        <span class="mui-icon mui-icon-compose"></span>
+        <span class="mui-tab-label">账目</span>
+    </a>
+
+    <a class="mui-tab-item" href="./calc.html">
+        <span class="mui-icon mui-icon-paperclip"></span>
+        <span class="mui-tab-label">统计</span>
+    </a>
+
+    <a class="mui-tab-item" href="./add.html">
+        <span class="mui-icon mui-icon-plus"></span>
+        <span class="mui-tab-label">记账</span>
+    </a>
+
+    <a class="mui-tab-item" href="./setting.html">
+        <span class="mui-icon mui-icon-gear"></span>
+        <span class="mui-tab-label">设置</span>
+    </a>
+</nav>
+<!--<script src="cordova.js"></script>-->
+<script src="./js/mui.min.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/jQuery.min.js"></script>
+<script type="text/javascript" src="./js/echarts.js"></script>
+<script type="text/javascript">
+    var refreshEarn = function(){
+        $.ajax({
+            url: host + '/rest/refreshfunds',
+            type: 'POST',
+            dataType:'json',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                mui.toast(result.msg);
+            },
+            error: function () {
+                mui.toast('操作完成');
+            }
+
+        });}
+    var refreshDate = function(){
+        $.ajax({
+            url: host + '/rest/resetdate',
+            type: 'POST',
+            dataType:'json',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                mui.toast(result.msg);
+            },
+            error: function () {
+                mui.toast('操作完成');
+            }
+
+        });}
+
+    var ful = new Date();
+    var month = (ful.getMonth() + 1)+'';
+    var fullmonth = month.length<2?"0"+month:month
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+
+    var bardom = document.getElementById("baritem");
+    var barChart = echarts.init(bardom);
+
+    var initearn = function(){
+        $.ajax({
+            url: host + '/rest/earntotal?datestr='+ful.getFullYear(),
+            type: 'POST',
+            dataType:'json',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                var earn =result[0]["TOTAL"];
+                var earncss ={};
+                if(earn>=0){
+                    earncss.color='red';
+                    earn="+"+earn;
+                }else{
+                    earncss.color='blue';
+                }
+                $("#yearearn").css(earncss).text(earn);
+            },
+            error: function () {
+                mui.toast('网络错误');
+            }
+
+        });
+        $.ajax({
+            url: host + '/rest/earntotal?datestr='+ful.getFullYear()+"-"+fullmonth,
+            type: 'POST',
+            dataType:'json',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                var earn =result[0]["TOTAL"];
+                var earncss ={};
+                if(earn>=0){
+                   earncss.color='red';
+                   earn="+"+earn;
+                }else{
+                    earncss.color='blue';
+                }
+                $("#monthearn").css(earncss).text(earn);
+            },
+            error: function () {
+                mui.toast('网络错误');
+            }
+
+        });
+    }
+    var initMonthMoney = function () {
+        var calenitem = document.getElementById("calendaritem");
+        var calenChart = echarts.init(calenitem);
+        $.ajax({
+            url: host + '/rest/monthfunds?datestr=' + ful.getFullYear() + '-' + fullmonth,
+            type: 'POST',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                var heatmapData = JSON.parse(result);
+                var option = {
+                    tooltip: {
+                        formatter: function (params) {
+                            return params.data[0]+' 收益: ' + params.data[2];
+                        }
+                    },
+                    title: {
+                        left: 'left',
+                        text: month + '月盈亏统计'
+                    },
+
+                    visualMap: {
+                        type: 'piecewise',
+                        orient: 'horizontal',
+                        left: 'center',
+                        top: 65,
+                        show:false,
+                        textStyle: {
+                            color: '#000'
+                        },
+                        pieces: [
+                            {gt: 0, color: 'red', colorAlpha: 0.5, label: '赚钱'},
+                            {value: 0, color: 'white', label: '保本'},
+                            {lt: 0, color: 'blue', colorAlpha: 0.5, label: '亏损'}
+                        ]
+                    },
+                    calendar: [{
+                        left: 'center',
+                        top: 'middle',
+                        cellSize: ['auto', '70'],
+                        orient: 'vertical',
+                        dayLabel: {
+                            firstDay: 7,
+                            nameMap: 'cn'
+                        },
+                        yearLabel: {
+                            show: false
+                        },
+                        monthLabel: {
+                            show: false
+                        },
+                        range: ful.getFullYear() + "-" + fullmonth
+                    }],
+
+                    series: [{
+                        type: 'scatter',
+                        coordinateSystem: 'calendar',
+                        symbolSize: 1,
+                        label: {
+                            show: true,
+                            formatter: function (params) {
+                                var d = echarts.number.parseDate(params.value[0]);
+                                return d.getDate() + '\n\n' + params.value[2] + '\n\n'
+                            },
+                            color: '#000',
+                            fontSize : 10,
+                            fontWeight: 700,
+                        },
+                        itemStyle: 'red',
+                        data: heatmapData
+                    }, {
+                        type: 'scatter',
+                        coordinateSystem: 'calendar',
+                        symbolSize: 1,
+                        label: {
+                            show: true,
+                            formatter: function (params) {
+                                return '\n\n\n' + (params.value[3] || '');
+                            },
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: '#a00'
+                        },
+                        data: heatmapData
+                    }, {
+                        name: '收益',
+                        type: 'heatmap',
+                        coordinateSystem: 'calendar',
+                        data: heatmapData
+                    }]
+                };
+
+                if (option && typeof option === "object") {
+                    calenChart.setOption(option, true);
+                }
+            },
+            error: function () {
+                mui.toast('网络错误');
+            }
+
+        });
+
+    }
+
+    var initDayMoney = function () {
+        var option = {
+            title: {
+                text: '日股票/基金贡献额度',
+                subtext: '',
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                    type: 'shadow'       // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            grid: {
+                top: 80,
+                bottom: 80
+            },
+            xAxis: {
+                type: 'value',
+                position: 'top',
+                splitLine: {
+                    lineStyle: {
+                        type: 'dashed'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'category',
+                axisLine: {show: false},
+                axisLabel: {show: false},
+                axisTick: {show: false},
+                splitLine: {show: false}
+            },
+            series: [
+                {
+                    name: '当日收益情况',
+                    type: 'bar',
+                    barWidth: '100%',
+                    stack: '总量',
+                    barCategoryGap: '1%',
+                    
+                    label: {
+                        show: true,
+                        formatter: '{b}   {c}'
+                    },
+                    itemStyle: {
+                        color: '#129eff',
+                        colorAlpha: 0.5,
+                        borderColor: '#666',
+                        borderWidth: 1
+                    },
+                    data: []
+                }
+            ]
+        };
+        $.ajax({
+            url: host + '/rest/dayfunds',
+            type: 'POST',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                var objdata = JSON.parse(result);
+                option.title.subtext = objdata[0].datestr;
+                option.series[0].data = objdata;
+                if (option && typeof option === "object") {
+                    barChart.setOption(option, true);
+                }
+            },
+            error: function () {
+                mui.toast('网络错误');
+            }
+
+        });
+    }
+
+
+    var getYearData = function (year) {
+        var dt = Math.random();
+        $.ajax({
+            url: host + '/rest/heatmap?dt=' + dt + '&year=' + year,
+            type: 'POST',
+            contentType: 'application/json',
+            beforeSend: function (request) {
+                request.setRequestHeader("token", token);
+            },
+            success: function (result) {
+                initheatmap(year, JSON.parse(result));
+            },
+            error: function () {
+                mui.toast('网络错误');
+            }
+        })
+    }
+
+    var initheatmap = function (year, data) {
+        var option = {
+            title: {
+                top: 30,
+                left: 'center',
+                text: year + '年盈亏统计'
+            },
+            tooltip: {},
+            visualMap: {
+                type: 'piecewise',
+                min: 0,
+                max: 10000,
+                range: [0, 10000],
+                orient: 'horizontal',
+                left: 'center',
+                top: 65,
+                textStyle: {
+                    color: '#000'
+                },
+                pieces: [
+                    {gt: 0, color: 'red', colorAlpha: 0.5, label: '赚钱'},
+                    {value: 0, color: 'white', label: '保本'},
+                    {lt: 0, color: 'blue', colorAlpha: 0.5, label: '亏损'}
+                ]
+            },
+            calendar: {
+                top: 120,
+                left: 30,
+                right: 30,
+                width: 'auto',
+                cellSize: 6,
+                range: year,
+                itemStyle: {
+                    borderWidth: 0.5
+                },
+                dayLabel: {
+                    nameMap: 'cn',
+                    fontSize: '6',
+                    padding: [0, 5]
+                },
+                monthLabel: {
+                    nameMap: [
+                        '一月', '二月', '三月',
+                        '四月', '五月', '六月',
+                        '七月', '八月', '九月',
+                        '十月', '十一月', '十二月'
+                    ],
+                    fontSize: '6',
+                    verticalAlign: 'middle'
+                },
+                orient: 'horizontal',
+                yearLabel: {show: false}
+            },
+            series: {
+                type: 'heatmap',
+                coordinateSystem: 'calendar',
+                data: data
+            }
+        };
+        if (option && typeof option === "object") {
+            myChart.setOption(option, true);
+        }
+    }
+    var yeardate = ful.getFullYear();
+    getYearData(yeardate);
+    initMonthMoney();
+    initDayMoney();
+    initearn();
+
+    $(function(){
+        var monthlinedom = document.getElementById('monthline');
+        var monthlinechart = echarts.init(monthlinedom);
+        var lineoption;
+
+        $.ajax({
+            url:host+'/rest/everymonth',
+            type:'POST',
+            data:{"datestr": yeardate},
+            dataType:'json',
+            beforeSend:function(request){
+                request.setRequestHeader("token",token);
+            },
+            success:function (result) {
+                lineoption = {
+                    xAxis: {
+                        type: 'category',
+                        data: ['1月', '2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+                    },
+                    color:["#5470c6","#91cc75","#fac858","#ee6666","#73c0de","#3ba272","#fc8452","#9a60b4","#ea7ccc"],
+                    yAxis: {
+                        type: 'value',
+                        show:true,
+                        axisLabel:{fontSize:8}
+                    },
+                    series: [{
+                        name:'净收益',
+                        data: result,
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                label: {
+                                    show: true, //开启显示
+                                    position: 'top', //在上方显示
+                                    textStyle: { //数值样式
+                                        color: 'black',
+                                        fontSize: 6
+                                    }
+                                }
+                            }
+                        },
+                        showBackground: true,
+                        backgroundStyle: {
+                            color: 'rgba(180, 180, 180, 0.2)'
+                        }
+                    }]
+                };
+
+                lineoption && monthlinechart.setOption(lineoption);
+            }
+        });
+
+
+
+
+        var cc = document.getElementById("fenbu");
+        var fenbuchart = echarts.init(cc);
+        var option = null;
+        var data = genData();
+
+        // option =
+        function genData() {
+            var legendData = [];
+            var seriesData = [];
+            var selected = {};
+            $.ajax({
+                url:host+'/rest/fenbu',
+                type:'POST',
+                data:{"datestr": yeardate},
+                dataType:'json',
+                beforeSend:function(request){
+                    request.setRequestHeader("token",token);
+                },
+                success:function (result) {
+                    for(var i=0;i<result.length;i++){
+
+                        var kind = result[i].KIND;
+                        var cash = result[i].CASH;
+                        legendData.push(kind);
+                        seriesData.push({
+                            name: kind,
+                            value: cash
+                        });
+                        selected[kind] = result.length;
+                    }
+                    fenbuchart.setOption({
+                        title: {
+                            text: '投资占比',
+                            subtext: '投资类型分布',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c} ({d}%)'
+                        },
+                        legend: {
+                            type: 'scroll',
+                            orient: 'vertical',
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            data: data.legendData,
+                            show: false,
+                            selected: data.selected
+                        },
+                        series: [
+                            {
+                                name: '类型',
+                                type: 'pie',
+                                radius: '55%',
+                                center: ['50%', '50%'],
+                                data: data.seriesData,
+                                emphasis: {
+                                    itemStyle: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    },true);
+
+                }
+            })
+
+            return {
+                legendData: legendData,
+                seriesData: seriesData,
+                selected: selected
+            };
+
+        };
+    })
+</script>
+</body>
+</html>
