@@ -6,7 +6,6 @@ import com.luxinx.bean.BeanAccount;
 import com.luxinx.bean.BeanWater;
 import com.luxinx.cron.Tzcrond;
 import com.luxinx.service.ServiceDataAccount;
-import com.sun.deploy.net.HttpResponse;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.relational.core.sql.In;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
@@ -34,7 +34,10 @@ public class ControllerAccount {
     @RequestMapping("/login")
     public String dologin(@RequestParam String username,@RequestParam String password,HttpServletResponse response) throws IOException {
         String md5key = MD5Encoder.encode((username + password).getBytes());
-        response.addCookie(new javax.servlet.http.Cookie("token",md5key));
+        Cookie cookie = new Cookie("token", md5key);
+        cookie.setPath("/"); // 设置Cookie的路径
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 设置Cookie的有效期为7天
+        response.addCookie(cookie);
         response.sendRedirect("../index.html");
         return "redirect:/index.html";
     }

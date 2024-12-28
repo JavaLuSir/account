@@ -192,7 +192,11 @@
             beforeSend:function(request){
                 request.setRequestHeader("token",token);
             },
+
             success: function (result) {
+                if(result['code']==302){
+                    location.href=result['url']
+                }
                 if(!result||result.length==0){
                     mui.toast("没有数据")
                     return;
