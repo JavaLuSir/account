@@ -34,7 +34,12 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-        <!-- SQLite JDBC -->
+        <!-- MySQL -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
