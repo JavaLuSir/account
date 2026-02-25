@@ -44,6 +44,8 @@ CREATE TABLE T_WATER (
     WACCNAME VARCHAR(100) DEFAULT NULL COMMENT '对方账户名',
     TRNUM DECIMAL(15,2) DEFAULT 0.00 COMMENT '交易金额',
     REMARK VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    OPPID VARCHAR(50) DEFAULT NULL COMMENT '对方账户ID',
+    IFAUTO VARCHAR(2) DEFAULT '0' COMMENT '是否自动生成: 0-手动 1-自动',
     CREATETIME DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     UPDATETIME DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (WID),
@@ -63,8 +65,10 @@ INSERT INTO T_ACCOUNT (PROP, OWNER, ACCNAME, ACCOUNT, BALANCE, MTYPE, REMARK, OP
 ('1', '张三', '中国银行', 'BOC123456', 15000.00, '储蓄卡', '中国银行储蓄卡', 'admin'),
 ('1', '张三', '支付宝', 'ALIPAY001', 8000.00, '第三方支付', '支付宝账户', 'admin'),
 ('1', '张三', '微信钱包', 'WECHAT001', 3000.00, '第三方支付', '微信支付', 'admin'),
+('1', '张三', '建设银行', 'CCB123456', 20000.00, '储蓄卡', '建设银行储蓄卡', 'admin'),
 ('2', '张三', '信用卡', 'CREDIT001', -5000.00, '信用卡', '招商银行信用卡', 'admin'),
-('2', '张三', '花呗', 'HUABEI001', -2000.00, '消费信贷', '支付宝花呗', 'admin');
+('2', '张三', '花呗', 'HUABEI001', -2000.00, '消费信贷', '支付宝花呗', 'admin'),
+('2', '张三', '京东白条', 'JDBT001', -1000.00, '消费信贷', '京东白条', 'admin');
 
 -- 插入测试流水
 INSERT INTO T_WATER (AID, TRDATE, TRADEKIND, TRTYPE, TRNUM, REMARK, OPERATER) VALUES
@@ -76,7 +80,8 @@ INSERT INTO T_WATER (AID, TRDATE, TRADEKIND, TRTYPE, TRNUM, REMARK, OPERATER) VA
 (5, CURDATE(), '5', '0', 2000.00, '信用卡还款', 'admin'),
 (2, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '4', '1', 10000.00, '理财收益', 'admin'),
 (3, DATE_SUB(CURDATE(), INTERVAL 2 DAY), '2', '0', 80.00, '网购', 'admin'),
-(1, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '1', '0', 500.00, '日常支出', 'admin');
+(1, DATE_SUB(CURDATE(), INTERVAL 3 DAY), '1', '0', 500.00, '日常支出', 'admin'),
+(6, DATE_SUB(CURDATE(), INTERVAL 1 DAY), '5', '0', 500.00, '花呗还款', 'admin');
 
 -- =============================================
 -- 视图：账户流水汇总
