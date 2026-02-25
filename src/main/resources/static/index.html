@@ -257,13 +257,19 @@ if(el){document.querySelectorAll(".bottom-nav .nav-link").forEach(function(x){x.
 if(p=="dashboard")loadDashboard();else if(p=="accounts")loadAccounts();else if(p=="water")loadAccountSelect();}
 
 async function loadDashboard(){
-var r=await fetch(API+"/account");accounts=await r.json();
+try{
+var r=await fetch(API+"/account");if(!r.ok){throw new Error("HTTP "+r.status);}
+accounts=await r.json();
 var ta=0,td=0;accounts.forEach(function(a){var b=parseFloat(a.balance)||0;if(a.prop=="1")ta+=b;else td+=b;});
 document.getElementById("totalAssets").innerHTML=fmtMoney(ta);
 document.getElementById("totalDebt").innerHTML=fmtMoney(td);
 var net=ta-td;var ne=document.getElementById("netAssets");ne.innerHTML=fmtMoney(net);ne.className="fw-bold fs-6 "+(net>=0?"text-success":"text-danger");
 var html=accounts.slice(0,10).map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong><br><small class=\"text-muted\">"+(a.owner||"")+"</small></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-outline-primary\" onclick=\"viewWater("+a.aid+")\">流水</button></td></tr>"}).join("");
 document.querySelector("#accountTable tbody").innerHTML=html||'<tr><td colspan="3" class="text-center text-muted py-3">暂无账户</td></tr>';
+}catch(e){
+console.error("loadDashboard error:",e);
+document.querySelector("#accountTable tbody").innerHTML='<tr><td colspan="3" class="text-center text-danger py-3">加载失败: '+e.message+'</td></tr>';
+}
 }
 
 async function loadAccounts(){
@@ -287,13 +293,18 @@ var sd=document.getElementById("startDate").value;
 var ed=document.getElementById("endDate").value;
 try{
 var url=(!aid||aid=="all")?API+"/waterall":API+"/list?id="+aid;
-var r=await fetch(url);var list=await r.json();
+var r=await fetch(url);
+if(!r.ok){throw new Error("HTTP " + r.status);}
+var list=await r.json();
 if(sd)list=list.filter(function(w){return getDateStr(w.trdate)>=sd});
 if(ed)list=list.filter(function(w){return getDateStr(w.trdate)<=ed});
 list.sort(function(a,b){return(b.trdate||0)-(a.trdate||0)});
-var html=list.map(function(w){var isIncome=w.trtype=="1";return"<tr><td>"+fmtDate(w.trdate)+"</td><td><span class=\"badge "+(isIncome?"bg-success":"bg-danger")+"\">"+(isIncome?"入金":"出金")+"</span></td><td><span class=\"amount "+(isIncome?"positive":"negative")+"\">"+(isIncome?"+":"-")+fmtMoney(w.trnum)+"</span></td><td>"+(w.remark||"-")+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delWater("+w.wid+")">删</button></td></tr>"}).join("");
+var html=list.map(function(w){var isIncome=w.trtype=="1";return"<tr><td>"+fmtDate(w.trdate)+"</td><td><span class=\"badge "+(isIncome?"bg-success":"bg-danger")+"\">"+(isIncome?"入金":"出金")+"</span></td><td><span class=\"amount "+(isIncome?"positive":"negative")+"\">"+(isIncome?"+":"-")+fmtMoney(w.trnum)+"</span></td><td>"+(w.remark||"-")+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delWater("+w.wid+")\">删</button></td></tr>"}).join("");
 document.querySelector("#waterTable tbody").innerHTML=html||'<tr><td colspan="5" class="text-center text-muted py-3">暂无流水</td></tr>';
-}catch(e){console.error(e);}
+}catch(e){
+console.error("loadWaterList error:",e);
+document.querySelector("#waterTable tbody").innerHTML='<tr><td colspan="5" class="text-center text-danger py-3">加载失败: '+e.message+'</td></tr>';
+}
 }
 
 function showAddAccountModal(){document.getElementById("addAccountForm").reset();new bootstrap.Modal(document.getElementById("addAccountModal")).show();}
