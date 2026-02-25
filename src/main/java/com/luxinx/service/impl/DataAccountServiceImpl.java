@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 流水查询实现类
+ * 流水查询实现�?
  */
 @Service
 public class DataAccountServiceImpl implements ServiceDataAccount {
@@ -40,7 +40,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<BeanAccount> queryAccount() {
-        String queryaccount = "SELECT T.* FROM T_ACCOUNT T WHERE T.IFUSE='0' ORDER BY ORDENUM";
+        String queryaccount = "SELECT T.* FROM T_ACCOUNT T ";
         NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
         List<BeanAccount> beanaccounts = npjt.query(queryaccount, new BeanAccount());
         return beanaccounts;
@@ -67,7 +67,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public String delAccount(String id) {
-        String delaccount = "UPDATE T_ACCOUNT SET IFUSE='-1' WHERE AID=?";
+        String delaccount = "DELETE FROM T_ACCOUNT WHERE AID=?";
         jdbcTemplate.update(delaccount, id);
         return "";
     }
@@ -85,10 +85,10 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         String trtype = (String) mapdetail.get("TRTYPE");
         BigDecimal trnum = (BigDecimal) mapdetail.get("TRNUM");
         BigDecimal resultBalance = null;
-        if ("1".equals(prop) && "0".equals(trtype)) { //如果是资产账户出金删除明细 增加金额
+        if ("1".equals(prop) && "0".equals(trtype)) { //如果是资产账户出金删除明�?增加金额
 
             resultBalance = balance.add(trnum);
-        } else if ("1".equals(prop) && "1".equals(trtype)) {  //如果是资产账户入金删除明细 减少金额
+        } else if ("1".equals(prop) && "1".equals(trtype)) {  //如果是资产账户入金删除明�?减少金额
             resultBalance = balance.add(trnum.negate());
         } else if ("2".equals(prop) && "0".equals(trtype)) { //如果是负债户出金 删除明细 减少金额
             resultBalance = balance.add(trnum.negate());
@@ -116,7 +116,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
                 trtype = "1";
             }
         }
-        // 如果没有TRKIND，根据TRTYPE设置默认值
+        // 如果没有TRKIND，根据TRTYPE设置默认�?
         if (tradekind == null || tradekind.isEmpty()) {
             tradekind = "0" + trtype;
         }
@@ -182,13 +182,13 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
             querysql.append("WHEN "+m.get("VALUE")+" THEN '"+m.get("TEXT")+"'");
         }
         querysql.append(" END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND");
-        //String sql = "SELECT sum(TRNUM) CASH,  CASE  TRADEKIND WHEN 10 THEN '居家'WHEN 20 THEN '食品' WHEN 30 THEN '交通' WHEN 40 THEN '投资' WHEN 50 THEN '还款' WHEN 61 THEN '工资' WHEN 71 THEN '投资收益' WHEN 81 THEN '其他收益'WHEN 90 THEN '投资亏损' END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND ";
+        //String sql = "SELECT sum(TRNUM) CASH,  CASE  TRADEKIND WHEN 10 THEN '居家'WHEN 20 THEN '食品' WHEN 30 THEN '交�? WHEN 40 THEN '投资' WHEN 50 THEN '还款' WHEN 61 THEN '工资' WHEN 71 THEN '投资收益' WHEN 81 THEN '其他收益'WHEN 90 THEN '投资亏损' END TRADEKIND FROM T_WATER WHERE DEL=0 AND TRADEKIND<>'00'  AND date_format(TRDATE,'%Y') = :datestr GROUP BY TRADEKIND ";
         NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
         MapSqlParameterSource param = new MapSqlParameterSource();
         param.addValue("datestr", datestr);
         List<Map<String, Object>> result = npjt.queryForList(querysql.toString(), param);
         for (Map<String, Object> m : result) {
-            if (m.get("TRADEKIND").equals("还房贷")) {
+            if (m.get("TRADEKIND").equals("还房�?)) {
                 BigDecimal bcm = new BigDecimal(m.get("CASH") + "");
                 BigDecimal huankuan = bcm.divide(new BigDecimal(2));
                 m.put("CASH", huankuan.floatValue());
@@ -271,7 +271,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<Map<String, Object>> fenbu() {
-        String sql = "SELECT ROUND(sum(TNUM*TBASE),2) CASH,CASE TZTYPE WHEN 1 THEN '股票' WHEN 2 THEN '黄金'  WHEN 3 THEN '存款'  WHEN 4 THEN '债券' WHEN 5 THEN '房产' WHEN 6 THEN '车' WHEN 7 THEN '比特币' END KIND FROM T_TOUZI GROUP BY TZTYPE";
+        String sql = "SELECT ROUND(sum(TNUM*TBASE),2) CASH,CASE TZTYPE WHEN 1 THEN '股票' WHEN 2 THEN '黄金'  WHEN 3 THEN '存款'  WHEN 4 THEN '债券' WHEN 5 THEN '房产' WHEN 6 THEN '�? WHEN 7 THEN '比特�? END KIND FROM T_TOUZI GROUP BY TZTYPE";
         NamedParameterJdbcTemplate npjt = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
         MapSqlParameterSource param = new MapSqlParameterSource();
         return npjt.queryForList(sql, param);
@@ -279,7 +279,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public void resetDate() {
-        String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+        String[] weeks = {"星期�?, "星期一", "星期�?, "星期�?, "星期�?, "星期�?, "星期�?};
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = new Date();
         Calendar cd = Calendar.getInstance();
@@ -341,14 +341,14 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
      *
      * @param accountFrom 来源账户
      * @param accountTo   目标账户
-     * @param trtype      交易类型;0出金；1入金
+     * @param trtype      交易类型;0出金�?入金
      * @param money       金额
      */
     private void trans(int accountFrom, int accountTo, int trtype, BigDecimal money) {
         if (accountFrom == accountTo) {
             return;
         }
-        String queryaccount = "SELECT T.PROP,T.BALANCE FROM T_ACCOUNT T WHERE T.AID=? AND T.IFUSE='0'";
+        String queryaccount = "SELECT T.PROP,T.BALANCE FROM T_ACCOUNT T WHERE T.AID=?";
         //源头账户金额
         Map<String, Object> dbfrom = jdbcTemplate.queryForMap(queryaccount, accountFrom);
         String fromProp = (String) dbfrom.get("PROP");
@@ -359,32 +359,32 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         String toProp = (String) dbTo.get("PROP");
         BigDecimal dbTomoney = (BigDecimal) dbTo.get("BALANCE");
 
-        //目标账户加
+        //目标账户�?
         BigDecimal toBalnaceResult = new BigDecimal(0);
-        //原始账号减
+        //原始账号�?
         BigDecimal fromBanalceResult = new BigDecimal(0);
 
-        if (fromProp.equals("1") && toProp.equals("1")) {//原/目标账户为资产账户
-            //目标账户加
+        if (fromProp.equals("1") && toProp.equals("1")) {//�?目标账户为资产账�?
+            //目标账户�?
             toBalnaceResult = dbTomoney.add(money);
-            //原始账号减
+            //原始账号�?
             fromBanalceResult = dbfrommoney.add(money.negate());
-        } else if (fromProp.equals("1") && toProp.equals("2")) {//原账户资产。目标账户负债
-            //目标账户减
+        } else if (fromProp.equals("1") && toProp.equals("2")) {//原账户资产。目标账户负�?
+            //目标账户�?
             toBalnaceResult = dbTomoney.add(money.negate());
-            //原始账号减
+            //原始账号�?
             fromBanalceResult = dbfrommoney.add(money.negate());
 
-        } else if (fromProp.equals("2") && toProp.equals("1")) {//原账户负债。目标账户资产
-            //目标账户减
+        } else if (fromProp.equals("2") && toProp.equals("1")) {//原账户负债。目标账户资�?
+            //目标账户�?
             toBalnaceResult = dbTomoney.add(money);
-            //原始账号减
+            //原始账号�?
             fromBanalceResult = dbfrommoney.add(money); 
 
-        } else if (fromProp.equals("2") && toProp.equals("2")) {//原账户负债。目标账户也是负债
-            //目标账户减
+        } else if (fromProp.equals("2") && toProp.equals("2")) {//原账户负债。目标账户也是负�?
+            //目标账户�?
             toBalnaceResult = dbTomoney.add(money.negate());
-            //原始账号减
+            //原始账号�?
             fromBanalceResult = dbfrommoney.add(money);
         }
 
@@ -398,26 +398,26 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
      * 消费更新余额
      *
      * @param account 账户id
-     * @param trtype  交易类型0入金；1出金
+     * @param trtype  交易类型0入金�?出金
      * @param num     金额
      */
     private void spend(int account, int trtype, BigDecimal num) {
-        String queryaccount = "SELECT T.PROP,T.BALANCE FROM T_ACCOUNT T WHERE T.AID=? AND T.IFUSE='0'";
+        String queryaccount = "SELECT T.PROP,T.BALANCE FROM T_ACCOUNT T WHERE T.AID=?";
 
         Map<String, Object> dbaccount = jdbcTemplate.queryForMap(queryaccount, account);
         BigDecimal balancemoney = (BigDecimal) dbaccount.get("BALANCE");
         String prop = (String) dbaccount.get("PROP");
-        //判断是资产还是负债账户。对应记账方式相反
+        //判断是资产还是负债账户。对应记账方式相�?
         BigDecimal balnaceresult = new BigDecimal(0);
-        if (prop.equals("1") && trtype == 0) {//资产户出金
-            BigDecimal oppsitenum = num.negate();//取负值
+        if (prop.equals("1") && trtype == 0) {//资产户出�?
+            BigDecimal oppsitenum = num.negate();//取负�?
             balnaceresult = balancemoney.add(oppsitenum); //进行金额计算
-        } else if (prop.equals("1") && trtype == 1) {//资产户入金
-            balnaceresult = balancemoney.add(num); //进行金额计算,负债账户消费加钱
+        } else if (prop.equals("1") && trtype == 1) {//资产户入�?
+            balnaceresult = balancemoney.add(num); //进行金额计算,负债账户消费加�?
         } else if (prop.equals("2") && trtype == 0) {
             balnaceresult = balancemoney.add(num); //负债户出金;
         } else if (prop.equals("2") && trtype == 1) {
-            BigDecimal oppsitenum = num.negate();//取负值
+            BigDecimal oppsitenum = num.negate();//取负�?
             balnaceresult = balancemoney.add(num); //负债户入金;
         }
 
