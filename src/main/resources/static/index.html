@@ -274,7 +274,11 @@ document.querySelector("#accountTable tbody").innerHTML='<tr><td colspan="3" cla
 }
 
 async function loadAccounts(){
-var r=await fetch(API+"/account");accounts=await r.json();
+console.log("Loading accounts...");
+var r=await fetch(API+"/account");
+console.log("Accounts response status:", r.status);
+accounts=await r.json();
+console.log("Accounts data:", accounts);
 var html=accounts.map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong></td><td><span class=\"badge "+(a.prop=="1"?"bg-success":"bg-danger")+"\">"+(a.prop=="1"?"资产":"负债")+"</span></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delAccount("+a.aid+")\">删除</button></td></tr>"}).join("");
 document.querySelector("#allAccountTable tbody").innerHTML=html||'<tr><td colspan="4" class="text-center text-muted py-3">暂无账户</td></tr>';
 }
@@ -312,16 +316,19 @@ function showAddAccountModal(){document.getElementById("addAccountForm").reset()
 
 async function addAccount(){
 var f=document.getElementById("addAccountForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.BALANCE=parseFloat(d.BALANCE)||0;
+console.log("Adding account:", d);
 try{
 var res=await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+console.log("Response status:", res.status);
 var result=await res.json();
+console.log("Response data:", result);
 bootstrap.Modal.getInstance(document.getElementById("addAccountModal")).hide();
-// 重新从服务器获取数据
+// 强制刷新账户列表
 accounts=[];
 await loadAccounts();
 await loadDashboard();
 showToast(result.msg||"添加成功",false);
-}catch(e){showToast("添加失败: "+e.message,true);}
+}catch(e){showToast("添加失败: "+e.message,true);console.error(e);}
 }
 
 async function delAccount(id){
