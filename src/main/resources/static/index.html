@@ -2,88 +2,215 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>家庭账本</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-body{background:#f5f7fa;padding-bottom:70px;margin:0}
-@media (min-width:768px){
-  body{padding-bottom:80px}
+*{-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{background:#f5f7fa;padding-bottom:70px;margin:0;touch-action:manipulation}
+/* 移动端优化 */
+@media (max-width:575.98px){
+  .container-fluid{padding-left:12px;padding-right:12px}
+  .navbar-brand{font-size:1rem}
+  h5{font-size:1rem}
+  .stat-card .text-muted{font-size:0.7rem}
+  .stat-card .fw-bold{font-size:1rem}
+  .table{font-size:0.8rem}
+  .btn{font-size:0.85rem;padding:0.4rem 0.6rem}
+  .card{padding:0.75rem;margin-bottom:0.5rem}
+  .form-control,.form-select{font-size:0.9rem;padding:0.5rem}
+  .modal-body{padding:1rem}
+  .modal-body .form-control,.modal-body .form-select{margin-bottom:0.5rem}
+}
+@media (min-width:576px){
+  body{padding-bottom:75px}
   .bottom-nav{padding:8px 0}
   .bottom-nav .nav-link{padding:12px 20px;font-size:16px}
 }
-@media (min-width:1024px){
-  body{padding-bottom:90px}
-  .bottom-nav{max-width:800px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+@media (min-width:992px){
+  body{padding-bottom:80px}
+  .bottom-nav{max-width:600px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
   .bottom-nav .nav-link{padding:15px 30px;font-size:18px}
   .stat-card{padding:20px!important}
-  .card{padding:15px}
+  .card{padding:15px;border-radius:16px}
 }
-.navbar{background:linear-gradient(135deg,#667eea,#764ba2)}
-.stat-card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08)}
+.navbar{background:linear-gradient(135deg,#667eea,#764ba2);padding:0.5rem 1rem}
+.navbar-brand{margin:0;font-weight:600}
+.stat-card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);background:#fff}
 .positive{color:#28a745}
 .negative{color:#dc3545}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:1000;padding:10px 0}
-.bottom-nav .nav-link{text-align:center;padding:10px 5px;font-size:14px;border-radius:8px;transition:background 0.2s}
-.bottom-nav .nav-link:hover{background:#f0f0f0}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 15px rgba(0,0,0,0.08);z-index:1000;padding:8px 0}
+.bottom-nav .nav-link{text-align:center;padding:10px 8px;font-size:13px;border-radius:12px;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;color:#6c757d;text-decoration:none}
+.bottom-nav .nav-link i{font-size:20px}
+.bottom-nav .nav-link:hover{background:#f8f9fa;color:#667eea}
 .bottom-nav .nav-link.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-.page{display:none}
+.page{display:none;height:calc(100vh - 110px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .page.active{display:block}
-.btn-sm{font-size:12px}
-.card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);margin-bottom:12px}
-@media (min-width:768px){
-  .card{margin-bottom:20px;border-radius:16px}
-  .stat-card .text-muted{font-size:14px}
-  .stat-card .fw-bold{font-size:20px}
-}
-@media (min-width:1024px){
-  .card{padding:10px;border-radius:20px}
-  .stat-card{padding:25px}
-}
-#loginPage{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;z-index:2000}
+.btn-sm{font-size:0.75rem;padding:0.25rem 0.5rem}
+.card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);margin-bottom:0.75rem;background:#fff}
+.card-header{background:transparent;border-bottom:1px solid #f0f0f0;padding:0.75rem 1rem;font-weight:600}
+.card-body{padding:0.75rem}
+.table{margin-bottom:0;font-size:0.85rem}
+.table th{font-weight:600;font-size:0.75rem;color:#6c757d;padding:0.5rem}
+.table td{padding:0.5rem;vertical-align:middle}
+.table-responsive{border-radius:0}
+#loginPage{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;z-index:2000;padding:1rem}
+.login-card{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
 .toast{position:fixed;top:20px;right:20px;z-index:9999;min-width:200px;padding:15px 20px;border-radius:8px;color:#fff;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn 0.3s ease}
 .toast.success{background:#28a745}
 .toast.error{background:#dc3545}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* 移动端安全区域适配 */
+@supports (padding-bottom: env(safe-area-inset-bottom)){
+  .bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+}
+/* 优化触摸 */
+.btn,.nav-link,.form-control,.form-select,.table td{padding:0.5rem 0.75rem}
+/* 金额高亮 */
+.amount{font-weight:600;font-family:system-ui,-apple-system,sans-serif}
+.amount.positive{color:#28a745}
+.amount.negative{color:#dc3545}
 </style>
 </head>
 <body>
 <div id="toast" class="toast" style="display:none"></div>
 
 <div id="loginPage">
-<div class="card p-4" style="width:350px;border-radius:16px;">
-<h4 class="text-center mb-3">家庭账本</h4>
-<input type="text" class="form-control mb-2" id="username" value="lu" placeholder="用户名">
-<input type="password" class="form-control mb-3" id="password" value="Lx@12345678" placeholder="密码">
-<button class="btn btn-primary w-100" onclick="doLogin()">登录</button>
+<div class="login-card">
+<h4 class="text-center mb-4">家庭账本</h4>
+<input type="text" class="form-control mb-3" id="username" value="lu" placeholder="用户名">
+<input type="password" class="form-control mb-4" id="password" value="Lx@12345678" placeholder="密码">
+<button class="btn btn-primary w-100 py-2" onclick="doLogin()">登录</button>
 </div>
 </div>
 
 <div id="mainContent" style="display:none;">
 <nav class="navbar navbar-dark sticky-top">
-<div class="container-fluid"><span class="navbar-brand">家庭账本</span><button class="btn btn-sm btn-light" onclick="logout()">退出</button></nav>
-
-<div id="page-dashboard" class="page active p-2">
-<h5 class="mt-2 mb-3">财务概览</h5>
-<div class="row g-2 mb-3">
-<div class="col-4"><div class="card stat-card p-2"><div class="text-muted small">总资产</div><div class="text-success fw-bold" id="totalAssets">0</div></div></div>
-<div class="col-4"><div class="card stat-card p-2"><div class="text-muted small">总负债</div><div class="text-danger fw-bold" id="totalDebt">0</div></div></div>
-<div class="col-4"><div class="card stat-card p-2"><div class="text-muted small">净资产</div><div class="fw-bold" id="netAssets">0</div></div></div>
+<div class="container-fluid d-flex justify-content-between align-items-center">
+<span class="navbar-brand mb-0 h1">家庭账本</span>
+<button class="btn btn-sm btn-light" onclick="logout()">退出</button>
 </div>
-<div class="card"><div class="card-header d-flex justify-content-between"><span>账户列表</span><button class="btn btn-sm btn-primary" onclick="showAddAccountModal()">添加</button></div>
-<div class="table-responsive"><table class="table table-sm" id="accountTable"><thead><tr><th>账户</th><th>余额</th><th></th></tr></thead><tbody></tbody></table></div></div></div></div>
+</nav>
 
-<div id="page-accounts" class="page p-2">
-<h5 class="mt-2 mb-3">账户管理</h5>
-<div class="card"><div class="table-responsive"><table class="table table-sm" id="allAccountTable"><thead><tr><th>账户</th><th>类型</th><th>余额</th><th>操作</th></tr></thead><tbody></tbody></table></div></div></div>
+<!-- 概览页 -->
+<div id="page-dashboard" class="page active px-2 pt-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h5 class="mb-0">财务概览</h5>
+</div>
+<div class="row g-2 mb-3">
+<div class="col-4">
+<div class="card stat-card text-center py-2">
+<div class="text-muted small">总资产</div>
+<div class="text-success fw-bold fs-6" id="totalAssets">0</div>
+</div>
+</div>
+<div class="col-4">
+<div class="card stat-card text-center py-2">
+<div class="text-muted small">总负债</div>
+<div class="text-danger fw-bold fs-6" id="totalDebt">0</div>
+</div>
+</div>
+<div class="col-4">
+<div class="card stat-card text-center py-2">
+<div class="text-muted small">净资产</div>
+<div class="fw-bold fs-6" id="netAssets">0</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header d-flex justify-content-between align-items-center">
+<span>账户列表</span>
+<button class="btn btn-sm btn-primary" onclick="showAddAccountModal()">
+<i class="bi bi-plus-lg"></i> 添加
+</button>
+</div>
+<div class="table-responsive">
+<table class="table table-hover mb-0" id="accountTable">
+<thead><tr><th>账户</th><th>余额</th><th></th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
 
-<div id="page-water" class="page p-2">
-<div class="row g-1 mb-2"><div class="col-6"><select class="form-select form-select-sm" id="accountSelect" onchange="loadWaterList()"><option value="all">全部账户</option></select></div>
-<div class="col-3"><input type="date" class="form-control form-control-sm" id="startDate" onchange="loadWaterList()"></div>
-<div class="col-3"><input type="date" class="form-control form-control-sm" id="endDate" onchange="loadWaterList()"></div></div>
-<div class="d-grid mb-3"><button class="btn btn-sm btn-primary" onclick="showAddWaterModal()">添加流水</button></div>
-<div class="card"><div class="table-responsive"><table class="table table-sm" id="waterTable"><thead><tr><th>时间</th><th>类型</th><th>金额</th><th>备注</th><th></th></tr></thead><tbody></tbody></table></div></div></div></div>
+<!-- 账户管理页 -->
+<div id="page-accounts" class="page px-2 pt-3">
+<h5 class="mb-3">账户管理</h5>
+<div class="card">
+<div class="table-responsive">
+<table class="table table-hover mb-0" id="allAccountTable">
+<thead><tr><th>账户</th><th>类型</th><th>余额</th><th>操作</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
 
-<nav class="bottom-nav"><div class="container-fluid"><div class="row"><div class="col-4"><a class="nav-link active" href="#" onclick="showPage('dashboard',this)">概览</a></div><div class="col-4"><a class="nav-link" href="#" onclick="showPage('accounts',this)">账户</a></div><div class="col-4"><a class="nav-link" href="#" onclick="showPage('water',this)">流水</a></div></div></div></nav>
+<!-- 流水页 -->
+<div id="page-water" class="page px-2 pt-3">
+<h5 class="mb-3">流水记录</h5>
+<div class="card mb-2">
+<div class="card-body py-2">
+<div class="row g-2">
+<div class="col-12">
+<select class="form-select form-select-sm" id="accountSelect" onchange="loadWaterList()">
+<option value="all">全部账户</option>
+</select>
+</div>
+<div class="col-6">
+<input type="date" class="form-control form-control-sm" id="startDate" onchange="loadWaterList()" placeholder="开始日期">
+</div>
+<div class="col-6">
+<input type="date" class="form-control form-control-sm" id="endDate" onchange="loadWaterList()" placeholder="结束日期">
+</div>
+</div>
+</div>
+</div>
+<div class="d-grid mb-3">
+<button class="btn btn-primary" onclick="showAddWaterModal()">
+<i class="bi bi-plus-lg"></i> 添加流水
+</button>
+</div>
+<div class="card">
+<div class="table-responsive">
+<table class="table table-hover mb-0" id="waterTable">
+<thead><tr><th>时间</th><th>类型</th><th>金额</th><th>备注</th><th></th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+<div class="container-fluid">
+<div class="row text-center">
+<div class="col-4">
+<a class="nav-link active" href="#" onclick="showPage('dashboard',this)">
+<i class="bi bi-house-door"></i>
+<span>概览</span>
+</a>
+</div>
+<div class="col-4">
+<a class="nav-link" href="#" onclick="showPage('accounts',this)">
+<i class="bi bi-wallet2"></i>
+<span>账户</span>
+</a>
+</div>
+<div class="col-4">
+<a class="nav-link" href="#" onclick="showPage('water',this)">
+<i class="bi bi-list-ul"></i>
+<span>流水</span>
+</a>
+</div>
+</div>
+</div>
+</nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -131,15 +258,15 @@ var r=await fetch(API+"/account");accounts=await r.json();
 var ta=0,td=0;accounts.forEach(function(a){var b=parseFloat(a.balance)||0;if(a.prop=="1")ta+=b;else td+=b;});
 document.getElementById("totalAssets").innerHTML=fmtMoney(ta);
 document.getElementById("totalDebt").innerHTML=fmtMoney(td);
-var net=ta-td;var ne=document.getElementById("netAssets");ne.innerHTML=fmtMoney(net);ne.className="fw-bold "+(net>=0?"text-success":"text-danger");
-var html=accounts.slice(0,10).map(function(a){return"<tr><td><strong>"+(a.accname||"")+"</strong><br><small class=\"text-muted\">"+(a.owner||"")+"</small></td><td class=\""+(parseFloat(a.balance)<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</td><td><button class=\"btn btn-sm btn-outline-primary\" onclick=\"viewWater("+a.aid+")\">流水</button></td></tr>"}).join("");
-document.querySelector("#accountTable tbody").innerHTML=html;
+var net=ta-td;var ne=document.getElementById("netAssets");ne.innerHTML=fmtMoney(net);ne.className="fw-bold fs-6 "+(net>=0?"text-success":"text-danger");
+var html=accounts.slice(0,10).map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong><br><small class=\"text-muted\">"+(a.owner||"")+"</small></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-outline-primary\" onclick=\"viewWater("+a.aid+")\">流水</button></td></tr>"}).join("");
+document.querySelector("#accountTable tbody").innerHTML=html||'<tr><td colspan="3" class="text-center text-muted py-3">暂无账户</td></tr>';
 }
 
 async function loadAccounts(){
 var r=await fetch(API+"/account");accounts=await r.json();
-var html=accounts.map(function(a){return"<tr><td><strong>"+(a.accname||"")+"</strong></td><td><span class=\"badge "+(a.prop=="1"?"bg-success":"bg-danger")+"\">"+(a.prop=="1"?"资产":"负债")+"</span></td><td class=\""+(parseFloat(a.balance)<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delAccount("+a.aid+")\">删除</button></td></tr>"}).join("");
-document.querySelector("#allAccountTable tbody").innerHTML=html;
+var html=accounts.map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong></td><td><span class=\"badge "+(a.prop=="1"?"bg-success":"bg-danger")+"\">"+(a.prop=="1"?"资产":"负债")+"</span></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delAccount("+a.aid+")\">删除</button></td></tr>"}).join("");
+document.querySelector("#allAccountTable tbody").innerHTML=html||'<tr><td colspan="4" class="text-center text-muted py-3">暂无账户</td></tr>';
 }
 
 async function loadAccountSelect(){
@@ -149,7 +276,7 @@ document.getElementById("accountSelect").innerHTML=html;
 loadWaterList();
 }
 
-function viewWater(aid){showPage("water",null);document.querySelectorAll(".bottom-nav .nav-link")[2].click();setTimeout(function(){document.getElementById("accountSelect").value=aid;loadWaterList();},100);}
+function viewWater(aid){showPage("water",null);setTimeout(function(){document.getElementById("accountSelect").value=aid;loadWaterList();},100);}
 
 async function loadWaterList(){
 var aid=document.getElementById("accountSelect").value;
@@ -161,8 +288,8 @@ var r=await fetch(url);var list=await r.json();
 if(sd)list=list.filter(function(w){return getDateStr(w.trdate)>=sd});
 if(ed)list=list.filter(function(w){return getDateStr(w.trdate)<=ed});
 list.sort(function(a,b){return(b.trdate||0)-(a.trdate||0)});
-var html=list.map(function(w){return"<tr><td>"+fmtDate(w.trdate)+"</td><td><span class=\"badge "+(w.trtype=="1"?"bg-success":"bg-danger")+"\">"+(w.trtype=="1"?"入金":"出金")+"</span></td><td class=\""+(w.trtype=="1"?"positive":"negative")+"\">"+(w.trtype=="1"?"+":"-")+fmtMoney(w.trnum)+"</td><td>"+(w.remark||"")+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delWater("+w.wid+")\">删除</button></td></tr>"}).join("");
-document.querySelector("#waterTable tbody").innerHTML=html;
+var html=list.map(function(w){var isIncome=w.trtype=="1";return"<tr><td>"+fmtDate(w.trdate)+"</td><td><span class=\"badge "+(isIncome?"bg-success":"bg-danger")+"\">"+(isIncome?"入金":"出金")+"</span></td><td><span class=\"amount "+(isIncome?"positive":"negative")+"\">"+(isIncome?"+":"-")+fmtMoney(w.trnum)+"</span></td><td>"+(w.remark||"-")+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delWater("+w.wid+")">删</button></td></tr>"}).join("");
+document.querySelector("#waterTable tbody").innerHTML=html||'<tr><td colspan="5" class="text-center text-muted py-3">暂无流水</td></tr>';
 }catch(e){console.error(e);}
 }
 
@@ -203,36 +330,63 @@ var token=localStorage.getItem("token");
 if(token){document.getElementById("loginPage").style.display="none";document.getElementById("mainContent").style.display="block";loadDashboard();}
 </script>
 
-<div class="modal fade" id="addAccountModal">
-<div class="modal-dialog modal-sm"><div class="modal-content">
-<div class="modal-header"><h6>添加账户</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<!-- 添加账户弹窗 -->
+<div class="modal fade" id="addAccountModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h6 class="modal-title">添加账户</h6>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
 <div class="modal-body">
 <form id="addAccountForm">
 <input type="text" class="form-control mb-2" name="ACCNAME" placeholder="账户名称" required>
 <input type="text" class="form-control mb-2" name="OWNER" placeholder="所有人" required>
-<input type="text" class="form-control mb-2" name="ACCOUNT" placeholder="账号" required>
-<select class="form-select mb-2" name="PROP"><option value="1">资产</option><option value="2">负债</option></select>
+<input type="text" class="form-control mb-2" name="ACCOUNT" placeholder="账号">
+<select class="form-select mb-2" name="PROP">
+<option value="1">资产</option>
+<option value="2">负债</option>
+</select>
 <input type="number" class="form-control mb-2" name="BALANCE" placeholder="余额" step="0.01" value="0">
-<input type="text" class="form-control mb-2" name="REMARK" placeholder="备注">
+<input type="text" class="form-control" name="REMARK" placeholder="备注">
 </form>
 </div>
-<div class="modal-footer"><button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-sm btn-primary" onclick="addAccount()">保存</button></div>
-</div></div></div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+<button type="button" class="btn btn-primary btn-sm" onclick="addAccount()">保存</button>
+</div>
+</div>
+</div>
+</div>
 
-<div class="modal fade" id="addWaterModal">
-<div class="modal-dialog modal-sm"><div class="modal-content">
-<div class="modal-header"><h6>添加流水</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<!-- 添加流水弹窗 -->
+<div class="modal fade" id="addWaterModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h6 class="modal-title">添加流水</h6>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
 <div class="modal-body">
 <form id="addWaterForm">
-<select class="form-select mb-2" id="waterAccountSelect"><option value="">选择账户</option></select>
+<select class="form-select mb-2" id="waterAccountSelect">
+<option value="">选择账户</option>
+</select>
 <input type="date" class="form-control mb-2" name="TRDATE" required>
-<select class="form-select mb-2" name="TRTYPE"><option value="0">出金</option><option value="1">入金</option></select>
+<select class="form-select mb-2" name="TRTYPE">
+<option value="0">出金</option>
+<option value="1">入金</option>
+</select>
 <input type="number" class="form-control mb-2" name="TRNUM" placeholder="金额" step="0.01" required>
-<input type="text" class="form-control mb-2" name="REMARK" placeholder="备注">
+<input type="text" class="form-control" name="REMARK" placeholder="备注">
 </form>
 </div>
-<div class="modal-footer"><button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">取消</button><button class="btn btn-sm btn-primary" onclick="addWater()">保存</button></div>
-</div></div></div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
+<button type="button" class="btn btn-primary btn-sm" onclick="addWater()">保存</button>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>
-
