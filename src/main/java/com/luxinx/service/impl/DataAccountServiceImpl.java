@@ -48,21 +48,39 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public Map<String, String> addAccount(Map<String, String> param) {
-        String prop = param.get("PROP");
-        String owner = param.get("OWNER");
-        String accname = param.get("ACCNAME");
-        String account = param.get("ACCOUNT");
-        String balance = param.get("BALANCE");
-        String remark = param.get("REMARK");
+        try {
+            String prop = param.get("PROP");
+            String owner = param.get("OWNER");
+            String accname = param.get("ACCNAME");
+            String account = param.get("ACCOUNT");
+            String balance = param.get("BALANCE");
+            String remark = param.get("REMARK");
 
-        String addaccount = "INSERT INTO T_ACCOUNT (PROP,OWNER,ACCNAME,ACCOUNT,BALANCE,REMARK,OPERATER,CREATETIME,UPDATETIME) VALUES (?,?,?,?,?,?,?,NOW(),NOW())";
+            System.out.println("=== addAccount params ===");
+            System.out.println("PROP: " + prop);
+            System.out.println("OWNER: " + owner);
+            System.out.println("ACCNAME: " + accname);
+            System.out.println("ACCOUNT: " + account);
+            System.out.println("BALANCE: " + balance);
+            System.out.println("REMARK: " + remark);
 
-        jdbcTemplate.update(addaccount, prop, owner, accname, account, balance, remark, "admin");
-        Map<String, String> result = new HashMap<>();
-        result.put("code", "0");
-        result.put("msg", "创建成功");
+            String addaccount = "INSERT INTO T_ACCOUNT (PROP,OWNER,ACCNAME,ACCOUNT,BALANCE,REMARK,OPERATER,CREATETIME,UPDATETIME) VALUES (?,?,?,?,?,?,?,NOW(),NOW())";
 
-        return result;
+            int result = jdbcTemplate.update(addaccount, prop, owner, accname, account, balance, remark, "admin");
+            System.out.println("=== insert result: " + result + " ===");
+
+            Map<String, String> resultMap = new HashMap<>();
+            resultMap.put("code", "0");
+            resultMap.put("msg", "创建成功");
+            return resultMap;
+        } catch (Exception e) {
+            System.out.println("=== addAccount error: " + e.getMessage() + " ===");
+            e.printStackTrace();
+            Map<String, String> resultMap = new HashMap<>();
+            resultMap.put("code", "1");
+            resultMap.put("msg", "创建失败: " + e.getMessage());
+            return resultMap;
+        }
     }
 
     @Override
