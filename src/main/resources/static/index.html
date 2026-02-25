@@ -316,8 +316,11 @@ try{
 var res=await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
 var result=await res.json();
 bootstrap.Modal.getInstance(document.getElementById("addAccountModal")).hide();
-accounts=[]; // clear cache
-loadAccounts();loadDashboard();showToast(result.msg||"添加成功",false);
+// 重新从服务器获取数据
+accounts=[];
+await loadAccounts();
+await loadDashboard();
+showToast(result.msg||"添加成功",false);
 }catch(e){showToast("添加失败: "+e.message,true);}
 }
 
@@ -343,7 +346,9 @@ try{
 var res=await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
 var result=await res.json();
 bootstrap.Modal.getInstance(document.getElementById("addWaterModal")).hide();
-loadWaterList();loadDashboard();showToast(result.msg||"添加成功",false);
+await loadWaterList();
+await loadDashboard();
+showToast(result.msg||"添加成功",false);
 }catch(e){showToast("添加失败: "+e.message,true);}
 }
 
