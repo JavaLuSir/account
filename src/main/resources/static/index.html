@@ -43,7 +43,8 @@ body{background:#f5f7fa;padding-bottom:70px;margin:0;touch-action:manipulation}
 .stat-card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);background:#fff}
 .positive{color:#28a745}
 .negative{color:#dc3545}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 15px rgba(0,0,0,0.08);z-index:1000;padding:8px 0}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 15px rgba(0,0,0,0.08);z-index:1000;padding:8px 0;max-width:1200px;margin:0 auto;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+@media (max-width:1200px){.bottom-nav{max-width:100%;left:0;transform:none;border-radius:0}}
 .bottom-nav .nav-link{text-align:center;padding:10px 8px;font-size:13px;border-radius:12px;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;color:#6c757d;text-decoration:none}
 .bottom-nav .nav-link i{font-size:20px}
 .bottom-nav .nav-link:hover{background:#f8f9fa;color:#667eea}
@@ -311,7 +312,13 @@ function showAddAccountModal(){document.getElementById("addAccountForm").reset()
 
 async function addAccount(){
 var f=document.getElementById("addAccountForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.BALANCE=parseFloat(d.BALANCE)||0;
-try{await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});bootstrap.Modal.getInstance(document.getElementById("addAccountModal")).hide();loadAccounts();loadDashboard();showToast("添加成功",false);}catch(e){showToast("添加失败",true);}
+try{
+var res=await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+var result=await res.json();
+bootstrap.Modal.getInstance(document.getElementById("addAccountModal")).hide();
+accounts=[]; // clear cache
+loadAccounts();loadDashboard();showToast(result.msg||"添加成功",false);
+}catch(e){showToast("添加失败: "+e.message,true);}
 }
 
 async function delAccount(id){
@@ -332,7 +339,12 @@ async function addWater(){
 var aid=document.getElementById("waterAccountSelect").value;
 if(!aid){showToast("请选择账户",true);return;}
 var f=document.getElementById("addWaterForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.AID=aid;d.TRNUM=parseFloat(d.TRNUM)||0;
-try{await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});bootstrap.Modal.getInstance(document.getElementById("addWaterModal")).hide();loadWaterList();loadDashboard();showToast("添加成功",false);}catch(e){showToast("添加失败",true);}
+try{
+var res=await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+var result=await res.json();
+bootstrap.Modal.getInstance(document.getElementById("addWaterModal")).hide();
+loadWaterList();loadDashboard();showToast(result.msg||"添加成功",false);
+}catch(e){showToast("添加失败: "+e.message,true);}
 }
 
 async function delWater(id){
