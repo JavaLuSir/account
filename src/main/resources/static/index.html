@@ -368,6 +368,15 @@ try{await fetch(API+"/deldetail?id="+id);loadWaterList();loadDashboard();showToa
 
 var token=localStorage.getItem("token");
 if(token){document.getElementById("loginPage").style.display="none";document.getElementById("mainContent").style.display="block";loadDashboard();}
+
+// 绑定保存按钮事件
+document.getElementById("saveAccountBtn").addEventListener("click", function(){
+    addAccount();
+});
+
+document.getElementById("saveWaterBtn").addEventListener("click", function(){
+    addWater();
+});
 </script>
 
 <!-- 添加账户弹窗 -->
@@ -393,7 +402,7 @@ if(token){document.getElementById("loginPage").style.display="none";document.get
 </div>
 <div class="modal-footer">
 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
-<button type="button" class="btn btn-primary btn-sm" onclick="addAccount()">保存</button>
+<button type="button" class="btn btn-primary btn-sm" id="saveAccountBtn">保存</button>
 </div>
 </div>
 </div>
@@ -423,7 +432,7 @@ if(token){document.getElementById("loginPage").style.display="none";document.get
 </div>
 <div class="modal-footer">
 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
-<button type="button" class="btn btn-primary btn-sm" onclick="addWater()">保存</button>
+<button type="button" class="btn btn-primary btn-sm" id="saveWaterBtn">保存</button>
 </div>
 </div>
 </div>
