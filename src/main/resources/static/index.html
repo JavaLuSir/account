@@ -312,9 +312,10 @@ document.querySelector("#waterTable tbody").innerHTML='<tr><td colspan="5" class
 }
 }
 
-function showAddAccountModal(){document.getElementById("addAccountForm").reset();new bootstrap.Modal(document.getElementById("addAccountModal")).show();}
+function showAddAccountModal(){console.log("Opening add account modal");document.getElementById("addAccountForm").reset();new bootstrap.Modal(document.getElementById("addAccountModal")).show();}
 
 async function addAccount(){
+console.log("=== addAccount function called ===");
 var f=document.getElementById("addAccountForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.BALANCE=parseFloat(d.BALANCE)||0;
 console.log("Adding account:", d);
 try{
