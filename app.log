@@ -1,0 +1,39 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.3.4.RELEASE)
+
+2026-02-27 19:44:01.818  INFO 70332 --- [           main] com.luxinx.account.AccountApplication    : Starting AccountApplication v0.0.1 on VM-24-16-opencloudos with PID 70332 (/root/account/target/account-0.0.1.jar started by root in /root/account)
+2026-02-27 19:44:01.823  INFO 70332 --- [           main] com.luxinx.account.AccountApplication    : No active profile set, falling back to default profiles: default
+2026-02-27 19:44:03.362  INFO 70332 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
+2026-02-27 19:44:03.379  INFO 70332 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12ms. Found 0 JDBC repository interfaces.
+2026-02-27 19:44:04.079  INFO 70332 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-02-27 19:44:04.092  INFO 70332 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-27 19:44:04.092  INFO 70332 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.38]
+2026-02-27 19:44:04.158  INFO 70332 --- [           main] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring embedded WebApplicationContext
+2026-02-27 19:44:04.159  INFO 70332 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2169 ms
+2026-02-27 19:44:04.170  INFO 70332 --- [           main] com.luxinx.config.DruidConfiguration     : init Druid Servlet Configuration
+2026-02-27 19:44:04.462  INFO 70332 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter webStatFilter was not registered (possibly already registered?)
+2026-02-27 19:44:04.464  INFO 70332 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Servlet statViewServlet was not registered (possibly already registered?)
+2026-02-27 19:44:04.686  INFO 70332 --- [           main] com.alibaba.druid.pool.DruidDataSource   : {dataSource-1} inited
+2026-02-27 19:44:05.135  INFO 70332 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2026-02-27 19:44:05.260  INFO 70332 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-02-27 19:44:05.651  INFO 70332 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2026-02-27 19:44:05.666  INFO 70332 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-02-27 19:44:05.770  INFO 70332 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path '/account'
+2026-02-27 19:44:05.828  INFO 70332 --- [           main] com.luxinx.account.AccountApplication    : Started AccountApplication in 4.809 seconds (JVM running for 5.385)
+2026-02-27 19:44:06.496  INFO 70332 --- [nio-8080-exec-1] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-27 19:44:06.497  INFO 70332 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-27 19:44:06.503  INFO 70332 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
+=== addAccount params ===
+PROP: 2
+OWNER: 1
+ACCNAME: 方法
+ACCOUNT: 
+BALANCE: 0
+REMARK: 11
+=== insert result: 1 ===
