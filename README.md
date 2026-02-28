@@ -1,21 +1,19 @@
 # account - 家庭账本管理系统
 
-一个简单的 Web 端账本应用，支持账户管理、流水记录和定时提醒功能。
+一个简洁的移动端优先的家庭收支记账应用。
 
 ## 功能特性
 
-- **账户管理** - 新增、修改、删除账户
-- **流水记录** - 记录收入和支出
-- **资产统计** - 查看总资产和总负债
-- **定时提醒** - 定时推送账目提醒
-- **移动端适配** - 支持手机浏览器访问
+- **账户管理** - 新增、删除账户，支持资产/负债分类
+- **流水记录** - 记录收入和支出，按类别分组
+- **数据统计** - 实时显示收入/支出汇总，饼图可视化
+- **移动端适配** - 底部Tab导航，响应式布局
 
 ## 技术栈
 
-- Spring Boot 2.3.4
-- MySQL 数据库
-- Druid 数据库连接池
-- 前端：MUI + jQuery + ECharts
+- 后端：Spring Boot 2.3.4 + MySQL + Druid
+- 前端：Bootstrap 5 + ECharts 5
+- 移动端：原生CSS布局，底部Tab导航
 
 ## 快速开始
 
@@ -27,13 +25,6 @@
 
 ### 2. 配置数据库
 
-在 MySQL 中创建数据库并导入 SQL 脚本：
-
-```sql
-CREATE DATABASE account DEFAULT CHARACTER SET utf8mb4;
--- 导入项目中的 sql 脚本
-```
-
 修改 `src/main/resources/application.yml` 中的数据库配置：
 
 ```yaml
@@ -44,22 +35,39 @@ spring:
     password: your_password
 ```
 
-### 3. 配置登录信息
-
-修改 `src/main/resources/application.properties`：
-
-```properties
-account.username=admin
-account.password=123456
-```
-
-### 4. 启动项目
+### 3. 启动项目
 
 ```bash
-mvn spring-boot:run
+mvn clean package
+java -jar target/account-0.0.1.jar
 ```
 
 访问 http://localhost:8080/account
+
+## 页面功能
+
+### 流水页面
+- 饼图：按类别显示支出分布
+- 收入/支出汇总：绿色显示收入，红色显示支出
+- 筛选：按账户、日期范围筛选
+- 操作：添加流水、删除流水
+
+### 概览页面
+- 总资产、总负债、净资产统计
+- 账户列表管理
+
+## API 接口
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /account/rest/account | 获取账户列表 |
+| POST | /account/rest/addaccount | 添加账户 |
+| POST | /account/rest/delaccount | 删除账户 |
+| GET | /account/rest/waterall | 获取所有流水 |
+| POST | /account/rest/adddetail | 添加流水 |
+| POST | /account/rest/deldetail | 删除流水 |
+| GET | /account/rest/category | 获取类别列表 |
+| GET | /account/rest/categorystats | 类别统计 |
 
 ## 项目结构
 
@@ -67,39 +75,17 @@ mvn spring-boot:run
 account/
 ├── src/main/
 │   ├── java/com/luxinx/
-│   │   ├── account/       # 启动类
 │   │   ├── bean/          # 实体类
-│   │   ├── config/        # 配置类
 │   │   ├── controller/    # 控制器
-│   │   ├── cron/          # 定时任务
-│   │   ├── dao/           # 数据访问层
 │   │   ├── service/       # 业务逻辑
-│   │   └── util/          # 工具类
+│   │   └── util/         # 工具类
 │   └── resources/
-│       ├── static/        # 静态资源
-│       ├── application.yml
-│       └── application.properties
+│       ├── static/        # 前端页面
+│       └── application.yml
 ├── pom.xml
 └── README.md
 ```
 
-## API 接口
-
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET/POST | /account/list | 账户列表 |
-| GET/POST | /account/add | 添加账户 |
-| GET/POST | /account/update | 更新账户 |
-| GET/POST | /account/delete | 删除账户 |
-| GET/POST | /water/list | 流水列表 |
-| GET/POST | /water/add | 添加流水 |
-| GET/POST | /water/delete | 删除流水 |
-
-## 页面说明
-
-- `index.html` - 主页面（资产概览、账户管理、流水记录）
-- `test.html` - 测试页面
-
-##  License
+## License
 
 MIT
