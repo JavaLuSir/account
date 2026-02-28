@@ -67,8 +67,8 @@ public class BeanAccount implements RowMapper<BeanAccount> {
     }
 
     public BigDecimal getBalance() {
-        balance.setScale(2);
-        return balance;
+        if (balance == null) return BigDecimal.ZERO;
+        return balance.setScale(2);
     }
 
     public void setBalance(BigDecimal balance) {

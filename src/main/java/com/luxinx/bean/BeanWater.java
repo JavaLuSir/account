@@ -32,6 +32,7 @@ public class BeanWater implements RowMapper {
     private String remark;
     private Date createtime;//创建时间
     private Date updatetime;//修改时间
+    private int cid;
     private BeanAccount beanAccount;
 
     public BeanAccount getBeanAccount() {
@@ -129,6 +130,14 @@ public class BeanWater implements RowMapper {
     public void setUpdatetime(Date updatetime) {
         this.updatetime = updatetime;
     }
+    
+    public int getCid() {
+        return cid;
+    }
+    
+    public void setCid(int cid) {
+        this.cid = cid;
+    }
 
     @Override
     public Object mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -143,6 +152,11 @@ public class BeanWater implements RowMapper {
       //  beanWater.setCreatetime( resultSet.getDate("CREATETIME"));
         beanWater.setUpdatetime( resultSet.getDate("UPDATETIME"));
         beanWater.setTrnum(resultSet.getBigDecimal("TRNUM"));
+        try {
+            beanWater.setCid(resultSet.getInt("CID"));
+        } catch (Exception e) {
+            // CID may be null
+        }
 
         return beanWater;
     }

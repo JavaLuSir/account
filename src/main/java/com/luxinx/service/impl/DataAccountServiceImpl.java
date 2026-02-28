@@ -1,6 +1,7 @@
 package com.luxinx.service.impl;
 
 import com.luxinx.bean.BeanAccount;
+import com.luxinx.bean.BeanCategory;
 import com.luxinx.bean.BeanWater;
 import com.luxinx.service.ServiceDataAccount;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<BeanWater> queryAllWater() {
-        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,REMARK,UPDATETIME FROM T_WATER ORDER BY UPDATETIME DESC";
+        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,REMARK,UPDATETIME,CID FROM T_WATER ORDER BY UPDATETIME DESC";
         return jdbcTemplate.query(sql, new BeanWater());
     }
 
@@ -82,30 +83,45 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public String delDetail(String id) {
-        String querydetail = "SELECT T.AID,T.PROP,W.WID,T.BALANCE,W.TRTYPE,W.TRNUM FROM T_ACCOUNT T LEFT JOIN T_WATER W ON T.AID = W.AID WHERE W.WID = ?";
-        Map<String, Object> mapdetail = jdbcTemplate.queryForMap(querydetail, id);
-        if (mapdetail == null || mapdetail.isEmpty()) {
+        try {
+            // 先查询流水详情
+            String querydetail = "SELECT AID, TRTYPE, TRNUM FROM T_WATER WHERE WID = ?";
+            Map<String, Object> waterMap = jdbcTemplate.queryForMap(querydetail, id);
+            if (waterMap == null || waterMap.isEmpty()) {
+                return "0";
+            }
+
+            int aid = (Integer) waterMap.get("AID");
+            String trtype = (String) waterMap.get("TRTYPE");
+            BigDecimal trnum = (BigDecimal) waterMap.get("TRNUM");
+
+            // 查询账户属性
+            String queryAccount = "SELECT PROP, BALANCE FROM T_ACCOUNT WHERE AID = ?";
+            Map<String, Object> accountMap = jdbcTemplate.queryForMap(queryAccount, aid);
+            String prop = (String) accountMap.get("PROP");
+            BigDecimal currentBalance = (BigDecimal) accountMap.get("BALANCE");
+
+            // 计算新余额：删除入金则减少余额，删除出金则增加余额
+            BigDecimal newBalance = currentBalance;
+            if ("1".equals(trtype)) {
+                // 入金（收入），删除时减去
+                newBalance = currentBalance.subtract(trnum);
+            } else if ("2".equals(trtype)) {
+                // 出金（支出），删除时加回
+                newBalance = currentBalance.add(trnum);
+            }
+
+            // 删除流水
+            String delwater = "DELETE FROM T_WATER WHERE WID=?";
+            jdbcTemplate.update(delwater, id);
+
+            // 更新账户余额
+            jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE =? WHERE AID=?", newBalance, aid);
+            return "1";
+        } catch (Exception e) {
+            e.printStackTrace();
             return "0";
         }
-
-        String prop = (String) mapdetail.get("PROP");
-        String trtype = (String) mapdetail.get("TRTYPE");
-        BigDecimal trnum = (BigDecimal) mapdetail.get("TRNUM");
-
-        String delaccount = "DELETE FROM T_WATER WHERE WID=?";
-        jdbcTemplate.update(delaccount, id);
-
-        int aid = (Integer) mapdetail.get("AID");
-        BigDecimal resultBalance = trnum;
-        if ("2".equals(prop) && "0".equals(trtype)) {
-            resultBalance = resultBalance.negate();
-        } else if ("1".equals(prop) && "1".equals(trtype)) {
-            resultBalance = resultBalance.negate();
-        }
-
-        jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE =? WHERE AID=?", resultBalance, aid);
-
-        return resultBalance.toString();
     }
 
     @Override
@@ -120,14 +136,15 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         String remark = param.get("REMARK");
         String oppid = param.get("OPPID");
         String ifauto = param.get("IFAUTO");
+        String cid = param.get("CID");
 
         if (tradekind == null) tradekind = "0";
         if (trtype == null) trtype = "0";
         if (ifauto == null) ifauto = "0";
 
-        String sql = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO) VALUES(?,?,?,?,?,?,?,?,?,NOW(),NOW(),?)";
+        String sql = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO,CID) VALUES(?,?,?,?,?,?,?,?,?,NOW(),NOW(),?,?)";
 
-        jdbcTemplate.update(sql, aid, trdate, tradekind, trtype, waccount, waccname, trnum, remark, oppid, ifauto);
+        jdbcTemplate.update(sql, aid, trdate, tradekind, trtype, waccount, waccname, trnum, remark, oppid, ifauto, cid);
 
         BigDecimal num = new BigDecimal(trnum);
         if ("1".equals(trtype)) {
@@ -229,5 +246,20 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public void resetDate() {
+    }
+
+    @Override
+    public List<BeanCategory> queryCategory(String ctype) {
+        String sql = "SELECT * FROM T_CATEGORY WHERE CTYPE=? ORDER BY CSORT";
+        return jdbcTemplate.query(sql, new BeanCategory(), ctype);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryCategoryStats(String datestr) {
+        String sql = "SELECT c.CNAME as name, SUM(w.TRNUM) as value " +
+                     "FROM T_WATER w LEFT JOIN T_CATEGORY c ON w.CID = c.CID " +
+                     "WHERE w.TRDATE LIKE ? AND w.TRTYPE = '2' " +
+                     "GROUP BY c.CNAME ORDER BY value DESC";
+        return jdbcTemplate.queryForList(sql, datestr + "%");
     }
 }

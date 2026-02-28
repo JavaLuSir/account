@@ -3,440 +3,551 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>家庭账本</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 <style>
-*{-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow-x:hidden}
-body{background:#f5f7fa;padding-bottom:70px;margin:0;touch-action:manipulation}
-/* 移动端优化 */
-@media (max-width:575.98px){
-  .container-fluid{padding-left:12px;padding-right:12px}
-  .navbar-brand{font-size:1rem}
-  h5{font-size:1rem}
-  .stat-card .text-muted{font-size:0.7rem}
-  .stat-card .fw-bold{font-size:1rem}
-  .table{font-size:0.8rem}
-  .btn{font-size:0.85rem;padding:0.4rem 0.6rem}
-  .card{padding:0.75rem;margin-bottom:0.5rem}
-  .form-control,.form-select{font-size:0.9rem;padding:0.5rem}
-  .modal-body{padding:1rem}
-  .modal-body .form-control,.modal-body .form-select{margin-bottom:0.5rem}
-}
-@media (min-width:576px){
-  body{padding-bottom:75px}
-  .bottom-nav{padding:8px 0}
-  .bottom-nav .nav-link{padding:12px 20px;font-size:16px}
-}
-@media (min-width:992px){
-  body{padding-bottom:80px}
-  .bottom-nav{max-width:600px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
-  .bottom-nav .nav-link{padding:15px 30px;font-size:18px}
-  .stat-card{padding:20px!important}
-  .card{padding:15px;border-radius:16px}
-}
-.navbar{background:linear-gradient(135deg,#667eea,#764ba2);padding:0.5rem 1rem}
-.navbar-brand{margin:0;font-weight:600}
-.stat-card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);background:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
+.page{display:none;height:calc(100vh - 60px);overflow-y:auto;padding:10px;padding-bottom:70px}
+.page.active{display:block}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:#fff;display:flex;align-items:center;z-index:9999;box-shadow:0 -2px 10px rgba(0,0,0,0.1)}
+.tab-item{flex:1;text-align:center;padding:10px;cursor:pointer;color:#999;font-size:12px}
+.tab-item.active{color:#667eea}
+.tab-item i{font-size:20px;display:block;margin-bottom:2px}
+.navbar{background:linear-gradient(135deg,#667eea,#764ba2);padding:12px;color:#fff}
+.stat-card{background:#fff;border-radius:12px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.table{font-size:13px}
+.table td{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.table td:nth-child(1),.table td:nth-child(3){max-width:none;white-space:normal}
 .positive{color:#28a745}
 .negative{color:#dc3545}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 15px rgba(0,0,0,0.08);z-index:1000;padding:8px 0;max-width:1200px;margin:0 auto;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
-@media (max-width:1200px){.bottom-nav{max-width:100%;left:0;transform:none;border-radius:0}}
-.bottom-nav .nav-link{text-align:center;padding:10px 8px;font-size:13px;border-radius:12px;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;color:#6c757d;text-decoration:none}
-.bottom-nav .nav-link i{font-size:20px}
-.bottom-nav .nav-link:hover{background:#f8f9fa;color:#667eea}
-.bottom-nav .nav-link.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-.page{display:none;height:calc(100vh - 110px);overflow-y:auto;-webkit-overflow-scrolling:touch}
-.page.active{display:block}
-.btn-sm{font-size:0.75rem;padding:0.25rem 0.5rem}
-.card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);margin-bottom:0.75rem;background:#fff}
-.card-header{background:transparent;border-bottom:1px solid #f0f0f0;padding:0.75rem 1rem;font-weight:600}
-.card-body{padding:0.75rem}
-.table{margin-bottom:0;font-size:0.85rem}
-.table th{font-weight:600;font-size:0.75rem;color:#6c757d;padding:0.5rem}
-.table td{padding:0.5rem;vertical-align:middle}
-.table-responsive{border-radius:0}
-#loginPage{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;z-index:2000;padding:1rem}
-.login-card{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
-.toast{position:fixed;top:20px;right:20px;z-index:9999;min-width:200px;padding:15px 20px;border-radius:8px;color:#fff;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn 0.3s ease}
+#loginPage{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;z-index:10000}
+.login-card{background:#fff;border-radius:16px;padding:30px;width:90%;max-width:360px}
+.btn-primary{background:#667eea;border:none}
+.btn-primary:hover{background:#5568d3}
+.toast{position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;color:#fff;font-weight:500;background:#333;display:none}
 .toast.success{background:#28a745}
 .toast.error{background:#dc3545}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-/* 移动端安全区域适配 */
-@supports (padding-bottom: env(safe-area-inset-bottom)){
-  .bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
-  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
-}
-/* 优化触摸 */
-.btn,.nav-link,.form-control,.form-select,.table td{padding:0.5rem 0.75rem}
-/* 金额高亮 */
-.amount{font-weight:600;font-family:system-ui,-apple-system,sans-serif}
-.amount.positive{color:#28a745}
-.amount.negative{color:#dc3545}
 </style>
 </head>
 <body>
-<div id="toast" class="toast" style="display:none"></div>
+<div id="toast" class="toast"></div>
 
 <div id="loginPage">
 <div class="login-card">
 <h4 class="text-center mb-4">家庭账本</h4>
-<input type="text" class="form-control mb-3" id="username" value="lu" placeholder="用户名">
-<input type="password" class="form-control mb-4" id="password" value="Lx@12345678" placeholder="密码">
+<input type="text" class="form-control mb-3" id="username" placeholder="用户名">
+<input type="password" class="form-control mb-4" id="password" placeholder="密码">
 <button class="btn btn-primary w-100 py-2" onclick="doLogin()">登录</button>
 </div>
 </div>
 
-<div id="mainContent" style="display:none;">
-<nav class="navbar navbar-dark sticky-top">
-<div class="container-fluid d-flex justify-content-between align-items-center">
-<span class="navbar-brand mb-0 h1">家庭账本</span>
+<!-- 流水页 -->
+<div id="page-water" class="page active">
+<div class="navbar mb-2 d-flex justify-content-between align-items-center">
+<span>流水记录</span>
 <button class="btn btn-sm btn-light" onclick="logout()">退出</button>
 </div>
-</nav>
+<div id="categoryChart" style="height:150px;margin-bottom:10px;"></div>
 
-<!-- 概览页 -->
-<div id="page-dashboard" class="page px-2 pt-3">
-<div class="d-flex justify-content-between align-items-center mb-3">
-<h5 class="mb-0">财务概览</h5>
-</div>
-<div class="row g-2 mb-3">
-<div class="col-4">
-<div class="card stat-card text-center py-2">
-<div class="text-muted small">总资产</div>
-<div class="text-success fw-bold fs-6" id="totalAssets">0</div>
+<!-- 流水汇总 -->
+<div class="row g-2 mb-2" id="waterSummary">
+<div class="col-6">
+<div class="stat-card text-center py-2">
+<div class="text-success small">收入</div>
+<div class="text-success fw-bold" id="totalIncome">0</div>
 </div>
 </div>
-<div class="col-4">
-<div class="card stat-card text-center py-2">
-<div class="text-muted small">总负债</div>
-<div class="text-danger fw-bold fs-6" id="totalDebt">0</div>
-</div>
-</div>
-<div class="col-4">
-<div class="card stat-card text-center py-2">
-<div class="text-muted small">净资产</div>
-<div class="fw-bold fs-6" id="netAssets">0</div>
-</div>
-</div>
-</div>
-<div class="card">
-<div class="card-header d-flex justify-content-between align-items-center">
-<span>账户列表</span>
-<button class="btn btn-sm btn-primary" onclick="showAddAccountModal()">
-<i class="bi bi-plus-lg"></i> 添加
-</button>
-</div>
-<div class="table-responsive">
-<table class="table table-hover mb-0" id="accountTable">
-<thead><tr><th>账户</th><th>余额</th><th></th></tr></thead>
-<tbody></tbody>
-</table>
+<div class="col-6">
+<div class="stat-card text-center py-2">
+<div class="text-danger small">支出</div>
+<div class="text-danger fw-bold" id="totalExpense">0</div>
 </div>
 </div>
 </div>
 
-<!-- 账户管理页 -->
-<div id="page-accounts" class="page px-2 pt-3">
-<h5 class="mb-3">账户管理</h5>
-<div class="card">
-<div class="table-responsive">
-<table class="table table-hover mb-0" id="allAccountTable">
-<thead><tr><th>账户</th><th>类型</th><th>余额</th><th>操作</th></tr></thead>
-<tbody></tbody>
-</table>
-</div>
-</div>
-</div>
-
-<!-- 流水页 -->
-<div id="page-water" class="page active px-2 pt-3">
-<h5 class="mb-3">流水记录</h5>
-<div class="card mb-2">
-<div class="card-body py-2">
-<div class="row g-2">
-<div class="col-12">
+<div class="mb-2">
 <select class="form-select form-select-sm" id="accountSelect" onchange="loadWaterList()">
 <option value="all">全部账户</option>
 </select>
 </div>
+<div class="row g-2 mb-2">
 <div class="col-6">
-<input type="date" class="form-control form-control-sm" id="startDate" onchange="loadWaterList()" placeholder="开始日期">
+<input type="date" class="form-control form-control-sm" id="startDate" onchange="loadWaterList()">
 </div>
 <div class="col-6">
-<input type="date" class="form-control form-control-sm" id="endDate" onchange="loadWaterList()" placeholder="结束日期">
+<input type="date" class="form-control form-control-sm" id="endDate" onchange="loadWaterList()">
 </div>
 </div>
-</div>
-</div>
-<div class="d-grid mb-3">
-<button class="btn btn-primary" onclick="showAddWaterModal()">
-<i class="bi bi-plus-lg"></i> 添加流水
-</button>
-</div>
+<button class="btn btn-primary w-100 mb-2" onclick="showAddWaterModal()">添加流水</button>
 <div class="card">
-<div class="table-responsive">
-<table class="table table-hover mb-0" id="waterTable">
-<thead><tr><th>时间</th><th>类型</th><th>金额</th><th>备注</th><th></th></tr></thead>
+<table class="table table-hover" id="waterTable">
+<thead><tr><th>时间</th><th>类别</th><th>金额</th><th>备注</th><th></th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 </div>
+
+<!-- 概览页 -->
+<div id="page-dashboard" class="page">
+<div class="navbar mb-3 d-flex justify-content-between align-items-center">
+<span>财务概览</span>
+<button class="btn btn-sm btn-light" onclick="logout()">退出</button>
+</div>
+<div class="row g-2 mb-3">
+<div class="col-4">
+<div class="stat-card text-center">
+<div class="text-muted small">总资产</div>
+<div class="text-success fw-bold" id="totalAssets">0</div>
+</div>
+</div>
+<div class="col-4">
+<div class="stat-card text-center">
+<div class="text-muted small">总负债</div>
+<div class="text-danger fw-bold" id="totalDebt">0</div>
+</div>
+</div>
+<div class="col-4">
+<div class="stat-card text-center">
+<div class="text-muted small">净资产</div>
+<div class="fw-bold" id="netAssets">0</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<span>账户列表</span>
+<button class="btn btn-sm btn-primary" onclick="showAddAccountModal()">添加</button>
+</div>
+<table class="table" id="accountTable">
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<!-- 账户页 -->
+<div id="page-accounts" class="page">
+<h5 class="mb-3">账户管理</h5>
+<div class="card">
+<table class="table" id="allAccountTable">
+<tbody></tbody>
+</table>
+</div>
 </div>
 
 <!-- 底部导航 -->
-<nav class="bottom-nav">
-<div class="container-fluid">
-<div class="row text-center">
-<div class="col-4">
-<a class="nav-link active" href="#" onclick="showPage('water',this)">
-<i class="bi bi-list-ul"></i>
-<span>流水</span>
-</a>
+<div class="tab-bar" id="tabBar">
+<div class="tab-item active" onclick="switchTab('water')" id="tab-water">
+<i class="bi bi-list-ul"></i>流水
 </div>
-<div class="col-4">
-<a class="nav-link" href="#" onclick="showPage('dashboard',this)">
-<i class="bi bi-house-door"></i>
-<span>概览</span>
-</a>
-</div>
-<div class="col-4">
-<a class="nav-link" href="#" onclick="showPage('accounts',this)">
-<i class="bi bi-wallet2"></i>
-<span>账户</span>
-</a>
+<div class="tab-item" onclick="switchTab('dashboard')" id="tab-dashboard">
+<i class="bi bi-house-door"></i>概览
 </div>
 </div>
-</div>
-</nav>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-var API = '/account/rest';
-var accounts = [];
-
-function showToast(msg, isError) {
-  var toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = 'toast ' + (isError ? 'error' : 'success');
-  toast.style.display = 'block';
-  setTimeout(function(){toast.style.display = 'none'},3000);
-}
-
-function doLogin(){
-var u=document.getElementById("username").value;
-var p=document.getElementById("password").value;
-if(u=="lu" && p=="Lx@12345678"){
-localStorage.setItem("token","ok");
-document.getElementById("loginPage").style.display="none";
-document.getElementById("mainContent").style.display="block";
-loadDashboard().catch(function(e){
-  showToast("数据加载失败: " + e.message, true);
-  console.error(e);
-});
-}else{
-showToast("用户名或密码错误",true);
-}
-}
-
-function logout(){
-if(confirm("确定退出")){localStorage.removeItem("token");location.reload();}
-}
-
-function fmtMoney(n){return(parseFloat(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
-function fmtDate(v){if(!v)return"";if(typeof v==="number"){var d=new Date(v);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}return String(v).substring(0,10);}
-function getDateStr(v){if(!v)return"";if(typeof v==="number"){var d=new Date(v);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}return String(v).substring(0,10);}
-
-function showPage(p,el){
-document.querySelectorAll(".page").forEach(function(x){x.classList.remove("active")});
-document.getElementById("page-"+p).classList.add("active");
-if(el){document.querySelectorAll(".bottom-nav .nav-link").forEach(function(x){x.classList.remove("active")});el.classList.add("active");}
-if(p=="dashboard")loadDashboard();else if(p=="accounts")loadAccounts();else if(p=="water")loadAccountSelect();}
-
-async function loadDashboard(){
-try{
-var r=await fetch(API+"/account");if(!r.ok){throw new Error("HTTP "+r.status);}
-accounts=await r.json();
-var ta=0,td=0;accounts.forEach(function(a){var b=parseFloat(a.balance)||0;if(a.prop=="1")ta+=b;else td+=b;});
-document.getElementById("totalAssets").innerHTML=fmtMoney(ta);
-document.getElementById("totalDebt").innerHTML=fmtMoney(td);
-var net=ta-td;var ne=document.getElementById("netAssets");ne.innerHTML=fmtMoney(net);ne.className="fw-bold fs-6 "+(net>=0?"text-success":"text-danger");
-var html=accounts.slice(0,10).map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong><br><small class=\"text-muted\">"+(a.owner||"")+"</small></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-outline-primary\" onclick=\"viewWater("+a.aid+")\">流水</button></td></tr>"}).join("");
-document.querySelector("#accountTable tbody").innerHTML=html||'<tr><td colspan="3" class="text-center text-muted py-3">暂无账户</td></tr>';
-}catch(e){
-console.error("loadDashboard error:",e);
-document.querySelector("#accountTable tbody").innerHTML='<tr><td colspan="3" class="text-center text-danger py-3">加载失败: '+e.message+'</td></tr>';
-}
-}
-
-async function loadAccounts(){
-console.log("Loading accounts...");
-var r=await fetch(API+"/account");
-console.log("Accounts response status:", r.status);
-accounts=await r.json();
-console.log("Accounts data:", accounts);
-var html=accounts.map(function(a){var bal=parseFloat(a.balance)||0;return"<tr><td><strong>"+(a.accname||"")+"</strong></td><td><span class=\"badge "+(a.prop=="1"?"bg-success":"bg-danger")+"\">"+(a.prop=="1"?"资产":"负债")+"</span></td><td><span class=\"amount "+(bal<0?"negative":"positive")+"\">"+fmtMoney(a.balance)+"</span></td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delAccount("+a.aid+")\">删除</button></td></tr>"}).join("");
-document.querySelector("#allAccountTable tbody").innerHTML=html||'<tr><td colspan="4" class="text-center text-muted py-3">暂无账户</td></tr>';
-}
-
-async function loadAccountSelect(){
-if(accounts.length===0){var r=await fetch(API+"/account");accounts=await r.json();}
-var html='<option value="all">全部账户</option>'+accounts.map(function(a){return'<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
-document.getElementById("accountSelect").innerHTML=html;
-loadWaterList();
-}
-
-function viewWater(aid){showPage("water",null);setTimeout(function(){document.getElementById("accountSelect").value=aid;loadWaterList();},100);}
-
-async function loadWaterList(){
-var aid=document.getElementById("accountSelect").value;
-var sd=document.getElementById("startDate").value;
-var ed=document.getElementById("endDate").value;
-try{
-var url=(!aid||aid=="all")?API+"/waterall":API+"/list?id="+aid;
-var r=await fetch(url);
-if(!r.ok){throw new Error("HTTP " + r.status);}
-var list=await r.json();
-if(sd)list=list.filter(function(w){return getDateStr(w.trdate)>=sd});
-if(ed)list=list.filter(function(w){return getDateStr(w.trdate)<=ed});
-list.sort(function(a,b){return(b.trdate||0)-(a.trdate||0)});
-var html=list.map(function(w){var isIncome=w.trtype=="1";return"<tr><td>"+fmtDate(w.trdate)+"</td><td><span class=\"badge "+(isIncome?"bg-success":"bg-danger")+"\">"+(isIncome?"入金":"出金")+"</span></td><td><span class=\"amount "+(isIncome?"positive":"negative")+"\">"+(isIncome?"+":"-")+fmtMoney(w.trnum)+"</span></td><td>"+(w.remark||"-")+"</td><td><button class=\"btn btn-sm btn-danger\" onclick=\"delWater("+w.wid+")\">删</button></td></tr>"}).join("");
-document.querySelector("#waterTable tbody").innerHTML=html||'<tr><td colspan="5" class="text-center text-muted py-3">暂无流水</td></tr>';
-}catch(e){
-console.error("loadWaterList error:",e);
-document.querySelector("#waterTable tbody").innerHTML='<tr><td colspan="5" class="text-center text-danger py-3">加载失败: '+e.message+'</td></tr>';
-}
-}
-
-function showAddAccountModal(){console.log("Opening add account modal");document.getElementById("addAccountForm").reset();new bootstrap.Modal(document.getElementById("addAccountModal")).show();}
-
-async function addAccount(){
-console.log("=== addAccount function called ===");
-var f=document.getElementById("addAccountForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.BALANCE=parseFloat(d.BALANCE)||0;
-console.log("Adding account:", d);
-try{
-var res=await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
-console.log("Response status:", res.status);
-var result=await res.json();
-console.log("Response data:", result);
-bootstrap.Modal.getInstance(document.getElementById("addAccountModal")).hide();
-// 强制刷新账户列表
-accounts=[];
-await loadAccounts();
-await loadDashboard();
-showToast(result.msg||"添加成功",false);
-}catch(e){showToast("添加失败: "+e.message,true);console.error(e);}
-}
-
-async function delAccount(id){
-if(!confirm("确定删除该账户"))return;
-try{await fetch(API+"/delaccount?id="+id);loadAccounts();loadDashboard();showToast("删除成功",false);}catch(e){showToast("删除失败",true);}
-}
-
-function showAddWaterModal(){
-var html='<option value="">选择账户</option>'+accounts.map(function(a){return'<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
-document.getElementById("waterAccountSelect").innerHTML=html;
-document.getElementById("addWaterForm").reset();
-var today=new Date().toISOString().slice(0,10);
-document.querySelector('#addWaterForm input[name="TRDATE"]').value=today;
-new bootstrap.Modal(document.getElementById("addWaterModal")).show();
-}
-
-async function addWater(){
-var aid=document.getElementById("waterAccountSelect").value;
-if(!aid){showToast("请选择账户",true);return;}
-var f=document.getElementById("addWaterForm");var d={};f.querySelectorAll("input,select").forEach(function(el){d[el.name]=el.value});d.AID=aid;d.TRNUM=parseFloat(d.TRNUM)||0;
-try{
-var res=await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
-var result=await res.json();
-bootstrap.Modal.getInstance(document.getElementById("addWaterModal")).hide();
-await loadWaterList();
-await loadDashboard();
-showToast(result.msg||"添加成功",false);
-}catch(e){showToast("添加失败: "+e.message,true);}
-}
-
-async function delWater(id){
-if(!confirm("确定删除该流水"))return;
-try{await fetch(API+"/deldetail?id="+id);loadWaterList();loadDashboard();showToast("删除成功",false);}catch(e){showToast("删除失败",true);}
-}
-
-var token=localStorage.getItem("token");
-if(token){document.getElementById("loginPage").style.display="none";document.getElementById("mainContent").style.display="block";loadDashboard();}
-
-// 绑定保存按钮事件
-document.addEventListener("DOMContentLoaded", function(){
-    document.getElementById("saveAccountBtn").addEventListener("click", function(){
-        addAccount();
-    });
-
-    document.getElementById("saveWaterBtn").addEventListener("click", function(){
-        addWater();
-    });
-});
-</script>
 
 <!-- 添加账户弹窗 -->
-<div class="modal fade" id="addAccountModal" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
+<div class="modal" id="addAccountModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10001;">
+<div class="modal-dialog" style="margin:50px auto;max-width:360px;">
 <div class="modal-content">
-<div class="modal-header">
-<h6 class="modal-title">添加账户</h6>
-<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
+<div class="modal-header"><h6 class="modal-title">添加账户</h6></div>
 <div class="modal-body">
-<form id="addAccountForm">
-<input type="text" class="form-control mb-2" name="ACCNAME" placeholder="账户名称" required>
-<input type="text" class="form-control mb-2" name="OWNER" placeholder="所有人" required>
-<input type="text" class="form-control mb-2" name="ACCOUNT" placeholder="账号">
-<select class="form-select mb-2" name="PROP">
+<input type="text" class="form-control mb-2" id="accname" placeholder="账户名称">
+<input type="text" class="form-control mb-2" id="owner" placeholder="持有人">
+<select class="form-select mb-2" id="prop">
 <option value="1">资产</option>
 <option value="2">负债</option>
 </select>
-<input type="number" class="form-control mb-2" name="BALANCE" placeholder="余额" step="0.01" value="0">
-<input type="text" class="form-control" name="REMARK" placeholder="备注">
-</form>
+<input type="number" class="form-control mb-2" id="balance" placeholder="余额" value="0">
 </div>
 <div class="modal-footer">
-<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
-<button type="button" class="btn btn-primary btn-sm" id="saveAccountBtn">保存</button>
+<button class="btn btn-sm btn-secondary" onclick="closeModal('addAccountModal')">取消</button>
+<button class="btn btn-sm btn-primary" onclick="addAccount()">保存</button>
 </div>
 </div>
 </div>
 </div>
 
 <!-- 添加流水弹窗 -->
-<div class="modal fade" id="addWaterModal" tabindex="-1">
-<div class="modal-dialog modal-dialog-centered">
+<div class="modal" id="addWaterModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10001;">
+<div class="modal-dialog" style="margin:50px auto;max-width:360px;">
 <div class="modal-content">
-<div class="modal-header">
-<h6 class="modal-title">添加流水</h6>
-<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
+<div class="modal-header"><h6 class="modal-title">添加流水</h6></div>
 <div class="modal-body">
-<form id="addWaterForm">
-<select class="form-select mb-2" id="waterAccountSelect">
-<option value="">选择账户</option>
-</select>
-<input type="date" class="form-control mb-2" name="TRDATE" required>
-<select class="form-select mb-2" name="TRTYPE">
-<option value="0">出金</option>
+<select class="form-select mb-2" id="waterAccountSelect"><option value="">选择账户</option></select>
+<input type="date" class="form-control mb-2" id="trdate">
+<select class="form-select mb-2" id="waterTypeSelect" onchange="loadCategories()">
+<option value="2">出金</option>
 <option value="1">入金</option>
 </select>
-<input type="number" class="form-control mb-2" name="TRNUM" placeholder="金额" step="0.01" required>
-<input type="text" class="form-control" name="REMARK" placeholder="备注">
-</form>
+<select class="form-select mb-2" id="categorySelect"><option value="">选择类别</option></select>
+<input type="number" class="form-control mb-2" id="trnum" placeholder="金额">
+<input type="text" class="form-control mb-2" id="remark" placeholder="备注">
 </div>
 <div class="modal-footer">
-<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button>
-<button type="button" class="btn btn-primary btn-sm" id="saveWaterBtn">保存</button>
+<button class="btn btn-sm btn-secondary" onclick="closeModal('addWaterModal')">取消</button>
+<button class="btn btn-sm btn-primary" onclick="addWater()">保存</button>
 </div>
 </div>
 </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script>
+var API = '/account/rest';
+var accounts = [];
+var categoryChart = null;
+
+function showToast(msg, isError) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast ' + (isError ? 'error' : 'success');
+    toast.style.display = 'block';
+    setTimeout(function(){toast.style.display = 'none'},3000);
+}
+
+function doLogin(){
+    var u = document.getElementById("username").value;
+    var p = document.getElementById("password").value;
+    if(u=="lu" && p=="Lx@12345678"){
+        localStorage.setItem("token","ok");
+        document.getElementById("loginPage").style.display = "none";
+        switchTab('water');
+    }else{
+        showToast("用户名或密码错误",true);
+    }
+}
+
+function logout(){
+    if(confirm("确定退出")){
+        localStorage.removeItem("token");
+        location.reload();
+    }
+}
+
+function fmtMoney(n){
+    return (parseFloat(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+}
+
+function fmtDate(v){
+    if(!v)return"";
+    if(typeof v==="object" && v instanceof Date){
+        return v.getFullYear()+"-"+String(v.getMonth()+1).padStart(2,"0")+"-"+String(v.getDate()).padStart(2,"0");
+    }
+    if(typeof v==="number"){
+        var d = new Date(v);
+        return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    }
+    return String(v).substring(0,10);
+}
+
+function switchTab(tabName){
+    // 隐藏所有页面
+    document.querySelectorAll('.page').forEach(function(x){x.style.display = 'none'});
+    // 显示选中的页面
+    document.getElementById('page-'+tabName).style.display = 'block';
+    
+    // 更新tab样式
+    document.querySelectorAll('.tab-item').forEach(function(x){x.classList.remove('active')});
+    document.getElementById('tab-'+tabName).classList.add('active');
+    
+    // 加载数据
+    if(tabName === "water"){
+        loadWaterData();
+    } else if(tabName === "dashboard"){
+        loadDashboard();
+    } else if(tabName === "accounts"){
+        loadAccounts();
+    }
+}
+
+function loadWaterData(){
+    var now = new Date();
+    var firstDay = new Date(now.getFullYear(),now.getMonth(),1);
+    var lastDay = new Date(now.getFullYear(),now.getMonth()+1,0);
+    document.getElementById("startDate").value = fmtDate(firstDay);
+    document.getElementById("endDate").value = fmtDate(lastDay);
+    loadAccountSelect();
+    loadWaterList();
+}
+
+async function loadDashboard(){
+    try{
+        var r = await fetch(API+"/account");
+        accounts = await r.json();
+        var ta = 0, td = 0;
+        accounts.forEach(function(a){
+            var b = parseFloat(a.balance)||0;
+            if(a.prop=="1") ta += b;
+            else td += b;
+        });
+        document.getElementById("totalAssets").innerHTML = fmtMoney(ta);
+        document.getElementById("totalDebt").innerHTML = fmtMoney(td);
+        var net = ta - td;
+        var ne = document.getElementById("netAssets");
+        ne.innerHTML = fmtMoney(net);
+        ne.className = "fw-bold " + (net>=0?"positive":"negative");
+        
+        var html = accounts.map(function(a){
+            var bal = parseFloat(a.balance)||0;
+            return "<tr><td><strong>"+(a.accname||"")+"</strong><br><small class='text-muted'>"+(a.owner||"")+"</small></td><td><span class='"+(bal<0?"negative":"positive")+"'>"+fmtMoney(a.balance)+"</span></td><td><button class='btn btn-sm' onclick='delAccount("+a.aid+")'>×</button></td></tr>";
+        }).join("");
+        document.querySelector("#accountTable tbody").innerHTML = html || '<tr><td class="text-center text-muted">暂无账户</td></tr>';
+    }catch(e){
+        console.error(e);
+    }
+}
+
+async function loadAccounts(){
+    try{
+        var r = await fetch(API+"/account");
+        accounts = await r.json();
+        var html = accounts.map(function(a){
+            var bal = parseFloat(a.balance)||0;
+            return "<tr><td>"+(a.accname||"")+"<br><small class='text-muted'>"+(a.prop=="1"?"资产":"负债")+"</small></td><td class='"+(bal<0?"negative":"positive")+"'>"+fmtMoney(a.balance)+"</td></tr>";
+        }).join("");
+        document.querySelector("#allAccountTable tbody").innerHTML = html || '<tr><td class="text-center text-muted">暂无账户</td></tr>';
+    }catch(e){
+        console.error(e);
+    }
+}
+
+async function loadAccountSelect(){
+    try{
+        var r = await fetch(API+"/account");
+        accounts = await r.json();
+        var html = '<option value="all">全部账户</option>' + accounts.map(function(a){return '<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
+        document.getElementById("accountSelect").innerHTML = html;
+        document.getElementById("waterAccountSelect").innerHTML = '<option value="">选择账户</option>' + accounts.map(function(a){return '<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
+    }catch(e){
+        console.error(e);
+    }
+}
+
+async function loadWaterList(){
+    var aid = document.getElementById("accountSelect").value;
+    var sd = document.getElementById("startDate").value;
+    var ed = document.getElementById("endDate").value;
+    
+    // 转换日期为timestamp
+    var sdTime = sd ? new Date(sd).getTime() : 0;
+    var edTime = ed ? new Date(ed).getTime() + 86400000 : 0; // 加一天包含结束日期
+    
+    try{
+        var r = await fetch(API+"/waterall");
+        var data = await r.json();
+        
+        // 获取类别数据
+        var r1 = await fetch(API+"/category?ctype=2");
+        var categories = await r1.json();
+        var categoryMap = {};
+        categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
+        // 也获取入金类别
+        var r2 = await fetch(API+"/category?ctype=1");
+        var categories2 = await r2.json();
+        categories2.forEach(function(c){categoryMap[c.cid] = c.cname;});
+        
+        // 过滤日期范围
+        if(sdTime){
+            data = data.filter(function(w){return w.trdate >= sdTime;});
+        }
+        if(edTime){
+            data = data.filter(function(w){return w.trdate < edTime;});
+        }
+        // 过滤账户
+        if(aid && aid != "all"){
+            data = data.filter(function(w){return w.aid == aid;});
+        }
+        
+        // 计算收入和支出
+        var totalIncome = 0;
+        var totalExpense = 0;
+        data.forEach(function(w){
+            if(w.trtype=="1"){
+                totalIncome += parseFloat(w.trnum)||0;
+            }else{
+                totalExpense += parseFloat(w.trnum)||0;
+            }
+        });
+        document.getElementById("totalIncome").textContent = fmtMoney(totalIncome);
+        document.getElementById("totalExpense").textContent = fmtMoney(totalExpense);
+        
+        // 更新图表 - 根据当前筛选数据
+        var expenseData = {};
+        data.forEach(function(w){
+            if(w.trtype=="2"){ // 出金才统计到图表
+                var catName = categoryMap[w.cid] || "其他";
+                expenseData[catName] = (expenseData[catName]||0) + (parseFloat(w.trnum)||0);
+            }
+        });
+        var chartData = Object.keys(expenseData).map(function(k){return{name:k,value:expenseData[k]};});
+        var chartDom = document.getElementById("categoryChart");
+        if(chartData.length===0){
+            chartDom.innerHTML = "<div class='text-center text-muted py-5'>暂无消费数据</div>";
+        }else{
+            if(!categoryChart){
+                categoryChart = echarts.init(chartDom);
+            }
+            categoryChart.setOption({
+                tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+                series:[{type:'pie',radius:['40%','70%'],data:chartData}]
+            });
+        }
+        
+        var html = data.map(function(w){
+            var t = categoryMap[w.cid] || (w.trtype=="1"?"入金":"出金");
+            var c = w.trtype=="1"?"positive":"negative";
+            return "<tr><td>"+fmtDate(w.trdate)+"</td><td>"+t+"</td><td class='"+c+"'>"+fmtMoney(w.trnum)+"</td><td>"+(w.remark||"")+"</td><td><button class='btn btn-sm' onclick='delWater("+w.wid+")'>×</button></td></tr>";
+        }).join("");
+        document.querySelector("#waterTable tbody").innerHTML = html || '<tr><td colspan="4" class="text-center text-muted">暂无流水</td></tr>';
+    }catch(e){
+        console.error(e);
+    }
+}
+
+async function loadCategoryStats(){
+    var now = new Date();
+    var datestr = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
+    try{
+        var r = await fetch(API+"/categorystats?datestr="+datestr);
+        var data = await r.json();
+        
+        // 获取类别数据
+        var r1 = await fetch(API+"/category?ctype=2");
+        var categories = await r1.json();
+        var categoryMap = {};
+        categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
+        if(!data || data.length===0){
+            document.getElementById("categoryChart").innerHTML = "<div class='text-center text-muted py-5'>本月暂无消费数据</div>";
+            return;
+        }
+        var chartData = data.map(function(d){return{name:d.name,value:parseFloat(d.value)||0};});
+        var chartDom = document.getElementById("categoryChart");
+        if(!categoryChart){
+            categoryChart = echarts.init(chartDom);
+        }
+        categoryChart.setOption({
+            tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+            series:[{type:'pie',radius:['40%','70%'],data:chartData}]
+        });
+    }catch(e){
+        console.error(e);
+    }
+}
+
+function showAddAccountModal(){
+    document.getElementById("addAccountModal").style.display = "block";
+}
+
+function showAddWaterModal(){
+    var today = new Date().toISOString().slice(0,10);
+    document.getElementById("trdate").value = today;
+    loadAccountSelect();
+    loadCategories();
+    document.getElementById("addWaterModal").style.display = "block";
+}
+
+function closeModal(id){
+    document.getElementById(id).style.display = "none";
+}
+
+async function loadCategories(){
+    try{
+        var type = document.getElementById("waterTypeSelect").value;
+        var r = await fetch(API+"/category?ctype="+type);
+        var data = await r.json();
+        
+        // 获取类别数据
+        var r1 = await fetch(API+"/category?ctype=2");
+        var categories = await r1.json();
+        var categoryMap = {};
+        categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
+        if(!data || data.length === 0){
+            document.getElementById("categorySelect").innerHTML = '<option value="">暂无类别</option>';
+            return;
+        }
+        var html = '<option value="">选择类别</option>' + data.map(function(c){return '<option value="'+c.cid+'">'+c.cname+'</option>'}).join("");
+        document.getElementById("categorySelect").innerHTML = html;
+    }catch(e){
+        console.error("loadCategories error:", e);
+        document.getElementById("categorySelect").innerHTML = '<option value="">加载失败</option>';
+    }
+}
+
+async function addAccount(){
+    var accname = document.getElementById("accname").value;
+    if(!accname){showToast("请输入账户名称",true);return;}
+    var d = {
+        ACCNAME: accname,
+        OWNER: document.getElementById("owner").value,
+        PROP: document.getElementById("prop").value,
+        BALANCE: parseFloat(document.getElementById("balance").value)||0
+    };
+    try{
+        await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+        closeModal('addAccountModal');
+        showToast("添加成功",false);
+        loadAccounts();
+        loadDashboard();
+    }catch(e){
+        showToast("添加失败",true);
+    }
+}
+
+async function addWater(){
+    var aid = document.getElementById("waterAccountSelect").value;
+    if(!aid){showToast("请选择账户",true);return;}
+    var cid = document.getElementById("categorySelect").value;
+    if(!cid){showToast("请选择类别",true);return;}
+    var d = {
+        AID: aid,
+        CID: cid,
+        TRDATE: document.getElementById("trdate").value,
+        TRTYPE: document.getElementById("waterTypeSelect").value,
+        TRNUM: parseFloat(document.getElementById("trnum").value)||0,
+        REMARK: document.getElementById("remark").value
+    };
+    try{
+        await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+        closeModal('addWaterModal');
+        showToast("添加成功",false);
+        loadWaterList();
+        loadDashboard();
+    }catch(e){
+        showToast("添加失败",true);
+    }
+}
+
+async function delWater(id){
+    if(!confirm("确定删除"))return;
+    try{
+        await fetch(API+"/deldetail?id="+id);
+        loadWaterList();
+        loadDashboard();
+        showToast("删除成功",false);
+    }catch(e){
+        showToast("删除失败",true);
+    }
+}
+
+async function delAccount(id){
+    if(!confirm("确定删除该账户？"))return;
+    try{
+        await fetch(API+"/delaccount?id="+id);
+        loadDashboard();
+        showToast("删除成功",false);
+    }catch(e){
+        showToast("删除失败",true);
+    }
+}
+
+// 页面加载完成后的初始化
+var token = localStorage.getItem("token");
+if(token){
+    document.getElementById("loginPage").style.display = "none";
+    switchTab('water');
+}
+</script>
 </body>
 </html>

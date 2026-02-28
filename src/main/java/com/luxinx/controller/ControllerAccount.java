@@ -3,6 +3,7 @@ package com.luxinx.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.luxinx.bean.BeanAccount;
+import com.luxinx.bean.BeanCategory;
 import com.luxinx.bean.BeanWater;
 import com.luxinx.cron.Tzcrond;
 import com.luxinx.service.ServiceDataAccount;
@@ -219,6 +220,18 @@ public class ControllerAccount {
     @RequestMapping("/fenbu")
     public String fenbu() {
         return JSON.toJSONString(serviceDataAccount.fenbu());
+    }
+
+    @RequestMapping("/category")
+    public String category(@RequestParam String ctype) {
+        List<BeanCategory> categories = serviceDataAccount.queryCategory(ctype);
+        return JSONObject.toJSONString(categories);
+    }
+
+    @RequestMapping("/categorystats")
+    public String categoryStats(@RequestParam String datestr) {
+        List<Map<String, Object>> stats = serviceDataAccount.queryCategoryStats(datestr);
+        return JSONObject.toJSONString(stats);
     }
 
 

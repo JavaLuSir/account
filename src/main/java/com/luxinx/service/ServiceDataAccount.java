@@ -1,6 +1,7 @@
 package com.luxinx.service;
 
 import com.luxinx.bean.BeanAccount;
+import com.luxinx.bean.BeanCategory;
 import com.luxinx.bean.BeanWater;
 
 import java.util.List;
@@ -140,4 +141,14 @@ public interface ServiceDataAccount {
      * 判断是否是法定假日
      */
     boolean isBeakDay();
+
+    /**
+     * 查询类别
+     */
+    List<BeanCategory> queryCategory(String ctype);
+
+    /**
+     * 查询类别统计
+     */
+    List<Map<String, Object>> queryCategoryStats(String datestr);
 }
