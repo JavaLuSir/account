@@ -243,6 +243,7 @@ function fmtDate(v){
 }
 
 function switchTab(tabName){
+    console.log('switchTab called with:', tabName);
     // 隐藏所有页面
     document.querySelectorAll('.page').forEach(function(x){x.style.display = 'none'});
     // 显示选中的页面
@@ -254,6 +255,7 @@ function switchTab(tabName){
     
     // 加载数据
     if(tabName === "water"){
+        console.log('Calling loadWaterData');
         loadWaterData();
     } else if(tabName === "dashboard"){
         loadDashboard();
@@ -326,6 +328,8 @@ async function loadAccountSelect(){
 }
 
 async function loadWaterList(){
+    
+    
     var aid = document.getElementById("accountSelect").value;
     var sd = document.getElementById("startDate").value;
     var ed = document.getElementById("endDate").value;
@@ -335,10 +339,13 @@ async function loadWaterList(){
     var edStr = ed ? ed : '';
     
     try{
+        
         var r = await fetch(API+"/waterall");
         var data = await r.json();
+         
         
         // 获取类别数据
+        
         var r1 = await fetch(API+"/category?ctype=2");
         var categories = await r1.json();
         var categoryMap = {};
@@ -347,6 +354,7 @@ async function loadWaterList(){
         var r2 = await fetch(API+"/category?ctype=1");
         var categories2 = await r2.json();
         categories2.forEach(function(c){categoryMap[c.cid] = c.cname;});
+         
         
         // 过滤日期范围 (使用日期字符串比较)
         if(sdStr){
@@ -385,10 +393,11 @@ async function loadWaterList(){
         var expenseData = {};
         data.forEach(function(w){
             var catName = categoryMap[w.cid] || "其他";
-            var prefix = w.trtype=="1" ? "收入-" : "支出-";
-            var key = prefix + catName;
+            var key = catName;
             expenseData[key] = (expenseData[key]||0) + (parseFloat(w.trnum)||0);
         });
+        
+        
         var chartData = Object.keys(expenseData).map(function(k){return{name:k,value:expenseData[k]};});
         var chartDom = document.getElementById("categoryChart");
         
@@ -403,11 +412,11 @@ async function loadWaterList(){
         if(chartData.length===0){
             chartDom.innerHTML = "<div class='text-center text-muted py-5'>暂无数据</div>";
         }else{
-            if(!categoryChart){
-                categoryChart = echarts.init(chartDom);
+            if(categoryChart){
+                categoryChart.dispose();
             }
+            categoryChart = echarts.init(chartDom);
             categoryChart.setOption({
-                title: {text: monthLabel + ' 出入金', left: 'center', textStyle: {fontSize: 12}},
                 tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
                 series:[{type:'pie',radius:['40%','70%'],data:chartData}]
             });
@@ -420,7 +429,7 @@ async function loadWaterList(){
         }).join("");
         document.querySelector("#waterTable tbody").innerHTML = html || '<tr><td colspan="4" class="text-center text-muted">暂无流水</td></tr>';
     }catch(e){
-        console.error(e);
+        console.error('loadWaterList error:', e);
     }
 }
 
@@ -502,6 +511,14 @@ async function addAccount(){
         PROP: document.getElementById("prop").value,
         BALANCE: parseFloat(document.getElementById("balance").value)||0
     };
+    
+    // 显示遮罩层防止重复提交
+    var mask = document.createElement('div');
+    mask.id = 'loadingMask';
+    mask.style = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;';
+    mask.innerHTML = '<div style="background:white;padding:20px 40px;border-radius:8px;">提交中...</div>';
+    document.body.appendChild(mask);
+    
     try{
         await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
         closeModal('addAccountModal');
@@ -510,6 +527,8 @@ async function addAccount(){
         loadDashboard();
     }catch(e){
         showToast("添加失败",true);
+    } finally {
+        document.body.removeChild(mask);
     }
 }
 
@@ -530,7 +549,7 @@ async function addWater(){
     // 显示遮罩层防止重复提交
     var mask = document.createElement('div');
     mask.id = 'loadingMask';
-    mask.style = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    mask.style = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;display:flex;align-items:center;justify-content:center;';
     mask.innerHTML = '<div style="background:white;padding:20px 40px;border-radius:8px;">提交中...</div>';
     document.body.appendChild(mask);
     
@@ -571,8 +590,11 @@ async function delAccount(id){
 }
 
 // 页面加载完成后的初始化
+console.log('Page loading...');
 var token = localStorage.getItem("token");
+console.log('Token:', token);
 if(token){
+    console.log('Hiding login, switching to water tab');
     document.getElementById("loginPage").style.display = "none";
     switchTab('water');
 }
