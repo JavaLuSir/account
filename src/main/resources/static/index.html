@@ -330,9 +330,9 @@ async function loadWaterList(){
     var sd = document.getElementById("startDate").value;
     var ed = document.getElementById("endDate").value;
     
-    // 转换日期为timestamp
-    var sdTime = sd ? new Date(sd).getTime() : 0;
-    var edTime = ed ? new Date(ed).getTime() + 86400000 : 0; // 加一天包含结束日期
+    // 转为本地日期字符串进行比较，避免时区问题
+    var sdStr = sd ? sd : '';
+    var edStr = ed ? ed : '';
     
     try{
         var r = await fetch(API+"/waterall");
@@ -348,12 +348,20 @@ async function loadWaterList(){
         var categories2 = await r2.json();
         categories2.forEach(function(c){categoryMap[c.cid] = c.cname;});
         
-        // 过滤日期范围
-        if(sdTime){
-            data = data.filter(function(w){return w.trdate >= sdTime;});
+        // 过滤日期范围 (使用日期字符串比较)
+        if(sdStr){
+            data = data.filter(function(w){
+                var d = new Date(w.trdate);
+                var dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                return dateStr >= sdStr;
+            });
         }
-        if(edTime){
-            data = data.filter(function(w){return w.trdate < edTime;});
+        if(edStr){
+            data = data.filter(function(w){
+                var d = new Date(w.trdate);
+                var dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                return dateStr < edStr;
+            });
         }
         // 过滤账户
         if(aid && aid != "all"){
@@ -373,23 +381,33 @@ async function loadWaterList(){
         document.getElementById("totalIncome").textContent = fmtMoney(totalIncome);
         document.getElementById("totalExpense").textContent = fmtMoney(totalExpense);
         
-        // 更新图表 - 根据当前筛选数据
+        // 更新图表 - 根据当前筛选数据，显示出入金
         var expenseData = {};
         data.forEach(function(w){
-            if(w.trtype=="2"){ // 出金才统计到图表
-                var catName = categoryMap[w.cid] || "其他";
-                expenseData[catName] = (expenseData[catName]||0) + (parseFloat(w.trnum)||0);
-            }
+            var catName = categoryMap[w.cid] || "其他";
+            var prefix = w.trtype=="1" ? "收入-" : "支出-";
+            var key = prefix + catName;
+            expenseData[key] = (expenseData[key]||0) + (parseFloat(w.trnum)||0);
         });
         var chartData = Object.keys(expenseData).map(function(k){return{name:k,value:expenseData[k]};});
         var chartDom = document.getElementById("categoryChart");
+        
+        // 获取当前筛选的月份
+        var now = new Date();
+        var monthLabel = now.getFullYear() + '年' + String(now.getMonth()+1).padStart(2,'0') + '月';
+        if(sdStr){
+            var sd = new Date(sdStr);
+            monthLabel = sd.getFullYear() + '年' + String(sd.getMonth()+1).padStart(2,'0') + '月';
+        }
+        
         if(chartData.length===0){
-            chartDom.innerHTML = "<div class='text-center text-muted py-5'>暂无消费数据</div>";
+            chartDom.innerHTML = "<div class='text-center text-muted py-5'>暂无数据</div>";
         }else{
             if(!categoryChart){
                 categoryChart = echarts.init(chartDom);
             }
             categoryChart.setOption({
+                title: {text: monthLabel + ' 出入金', left: 'center', textStyle: {fontSize: 12}},
                 tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
                 series:[{type:'pie',radius:['40%','70%'],data:chartData}]
             });
@@ -508,6 +526,14 @@ async function addWater(){
         TRNUM: parseFloat(document.getElementById("trnum").value)||0,
         REMARK: document.getElementById("remark").value
     };
+    
+    // 显示遮罩层防止重复提交
+    var mask = document.createElement('div');
+    mask.id = 'loadingMask';
+    mask.style = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    mask.innerHTML = '<div style="background:white;padding:20px 40px;border-radius:8px;">提交中...</div>';
+    document.body.appendChild(mask);
+    
     try{
         await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
         closeModal('addWaterModal');
@@ -516,6 +542,8 @@ async function addWater(){
         loadDashboard();
     }catch(e){
         showToast("添加失败",true);
+    } finally {
+        document.body.removeChild(mask);
     }
 }
 

@@ -95,9 +95,19 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
             String trtype = (String) waterMap.get("TRTYPE");
             BigDecimal trnum = (BigDecimal) waterMap.get("TRNUM");
 
-            // 查询账户属性
+            // 查询账户是否存在
             String queryAccount = "SELECT PROP, BALANCE FROM T_ACCOUNT WHERE AID = ?";
-            Map<String, Object> accountMap = jdbcTemplate.queryForMap(queryAccount, aid);
+            List<Map<String, Object>> accountList = jdbcTemplate.queryForList(queryAccount, aid);
+            
+            if (accountList.isEmpty()) {
+                // 孤儿流水，直接删除
+                String delwater = "DELETE FROM T_WATER WHERE WID=?";
+                jdbcTemplate.update(delwater, id);
+                return "1";
+            }
+            
+            // 账户存在，按原逻辑删除
+            Map<String, Object> accountMap = accountList.get(0);
             String prop = (String) accountMap.get("PROP");
             BigDecimal currentBalance = (BigDecimal) accountMap.get("BALANCE");
 

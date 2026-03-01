@@ -145,7 +145,7 @@ public class BeanWater implements RowMapper {
         BeanWater beanWater = new BeanWater();
         beanWater.setAid(resultSet.getInt("AID"));
         beanWater.setWid(resultSet.getInt("WID"));
-        beanWater.setTrdate( resultSet.getDate("TRDATE"));
+        beanWater.setTrdate( resultSet.getTimestamp("TRDATE"));
       //  beanWater.setTradekind( resultSet.getString("TRADEKIND"));
         beanWater.setTrtype( resultSet.getString("TRTYPE"));
         beanWater.setRemark( resultSet.getString("REMARK"));
