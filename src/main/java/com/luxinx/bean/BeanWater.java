@@ -29,6 +29,7 @@ public class BeanWater implements RowMapper {
     private String waccount;
     private String waccname;
     private BigDecimal trnum;//交易金额
+    private BigDecimal balance;//流水后余额
     private String remark;
     private Date createtime;//创建时间
     private Date updatetime;//修改时间
@@ -106,6 +107,14 @@ public class BeanWater implements RowMapper {
     public void setTrnum(BigDecimal trnum) {
         this.trnum = trnum;
     }
+    
+    public BigDecimal getBalance() {
+        return balance;
+    }
+    
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
 
     public String getRemark() {
         return remark;
@@ -152,6 +161,11 @@ public class BeanWater implements RowMapper {
       //  beanWater.setCreatetime( resultSet.getDate("CREATETIME"));
         beanWater.setUpdatetime( resultSet.getDate("UPDATETIME"));
         beanWater.setTrnum(resultSet.getBigDecimal("TRNUM"));
+        try {
+            beanWater.setBalance(resultSet.getBigDecimal("BALANCE"));
+        } catch (Exception e) {
+            // BALANCE may be null for old records
+        }
         try {
             beanWater.setCid(resultSet.getInt("CID"));
         } catch (Exception e) {

@@ -20,13 +20,13 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<BeanWater> queryAccountInfoById(String id) {
-        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,REMARK,UPDATETIME FROM T_WATER WHERE AID=? ORDER BY UPDATETIME DESC";
+        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,BALANCE,REMARK,UPDATETIME FROM T_WATER WHERE AID=? ORDER BY UPDATETIME DESC";
         return jdbcTemplate.query(sql, new BeanWater(), id);
     }
 
     @Override
     public List<BeanWater> queryAllWater() {
-        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,REMARK,UPDATETIME,CID FROM T_WATER ORDER BY UPDATETIME DESC";
+        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,BALANCE,REMARK,UPDATETIME,CID FROM T_WATER ORDER BY UPDATETIME DESC";
         return jdbcTemplate.query(sql, new BeanWater());
     }
 
@@ -127,10 +127,37 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
             // 更新账户余额
             jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE =? WHERE AID=?", newBalance, aid);
+            
+            // 重新计算并更新该账户所有流水记录的余额
+            recalculateWaterBalances(aid);
+            
             return "1";
         } catch (Exception e) {
             e.printStackTrace();
             return "0";
+        }
+    }
+    
+    // 重新计算流水的余额
+    private void recalculateWaterBalances(int aid) {
+        // 按时间正序获取该账户所有流水记录
+        String sql = "SELECT WID, TRTYPE, TRNUM FROM T_WATER WHERE AID = ? ORDER BY CREATETIME ASC, WID ASC";
+        List<Map<String, Object>> waterList = jdbcTemplate.queryForList(sql, aid);
+        
+        BigDecimal balance = BigDecimal.ZERO;
+        for (Map<String, Object> w : waterList) {
+            int wid = (Integer) w.get("WID");
+            String trtype = (String) w.get("TRTYPE");
+            BigDecimal trnum = (BigDecimal) w.get("TRNUM");
+            
+            if ("1".equals(trtype)) {
+                balance = balance.add(trnum); // 入金
+            } else {
+                balance = balance.subtract(trnum); // 出金
+            }
+            
+            // 更新该条流水的余额
+            jdbcTemplate.update("UPDATE T_WATER SET BALANCE = ? WHERE WID = ?", balance, wid);
         }
     }
 
@@ -152,16 +179,30 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         if (trtype == null) trtype = "0";
         if (ifauto == null) ifauto = "0";
 
-        String sql = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO,CID) VALUES(?,?,?,?,?,?,?,?,?,NOW(),NOW(),?,?)";
-
-        jdbcTemplate.update(sql, aid, trdate, tradekind, trtype, waccount, waccname, trnum, remark, oppid, ifauto, cid);
-
-        BigDecimal num = new BigDecimal(trnum);
-        if ("1".equals(trtype)) {
-            jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE = BALANCE + ? WHERE AID=?", num, aid);
-        } else {
-            jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE = BALANCE - ? WHERE AID=?", num, aid);
+        // 获取当前账户余额
+        BigDecimal currentBalance = new BigDecimal("0");
+        try {
+            Map<String, Object> accountMap = jdbcTemplate.queryForMap("SELECT BALANCE FROM T_ACCOUNT WHERE AID = ?", aid);
+            currentBalance = (BigDecimal) accountMap.get("BALANCE");
+        } catch (Exception e) {
+            // ignore
         }
+
+        // 计算流水后的余额
+        BigDecimal num = new BigDecimal(trnum);
+        BigDecimal newBalance = currentBalance;
+        if ("1".equals(trtype)) {
+            newBalance = currentBalance.add(num); // 入金增加余额
+        } else {
+            newBalance = currentBalance.subtract(num); // 出金减少余额
+        }
+
+        // 插入流水记录，包含余额
+        String sql = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,BALANCE,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO,CID) VALUES(?,?,?,?,?,?,?,?,?,?,NOW(),NOW(),?,?)";
+        jdbcTemplate.update(sql, aid, trdate, tradekind, trtype, waccount, waccname, trnum, newBalance, remark, oppid, ifauto, cid);
+
+        // 更新账户余额
+        jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE = ? WHERE AID=?", newBalance, aid);
 
         Map<String, String> result = new HashMap<>();
         result.put("code", "0");
