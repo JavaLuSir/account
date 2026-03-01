@@ -21,8 +21,8 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 .table{font-size:13px}
 .table td{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .table td:nth-child(1),.table td:nth-child(3){max-width:none;white-space:normal}
-.positive{color:#28a745}
-.negative{color:#dc3545}
+.positive{color:#28a745 !important}
+.negative{color:#dc3545 !important}
 #loginPage{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;justify-content:center;align-items:center;z-index:10000}
 .login-card{background:#fff;border-radius:16px;padding:30px;width:90%;max-width:360px}
 .btn-primary{background:#667eea;border:none}
@@ -75,10 +75,10 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 </div>
 <div class="row g-2 mb-2">
 <div class="col-6">
-<input type="date" class="form-control form-control-sm" id="startDate" onchange="loadWaterList()">
+<input type="date" class="form-control form-control-sm" id="startDate" placeholder="开始日期" onchange="loadWaterList()">
 </div>
 <div class="col-6">
-<input type="date" class="form-control form-control-sm" id="endDate" onchange="loadWaterList()">
+<input type="date" class="form-control form-control-sm" id="endDate" placeholder="结束日期" onchange="loadWaterList()">
 </div>
 </div>
 <button class="btn btn-primary w-100 mb-2" onclick="showAddWaterModal()">添加流水</button>
@@ -176,7 +176,7 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 <div class="modal-header"><h6 class="modal-title">添加流水</h6></div>
 <div class="modal-body">
 <select class="form-select mb-2" id="waterAccountSelect"><option value="">选择账户</option></select>
-<input type="date" class="form-control mb-2" id="trdate">
+<input type="date" class="form-control mb-2" id="trdate" placeholder="选择日期">
 <select class="form-select mb-2" id="waterTypeSelect" onchange="loadCategories()">
 <option value="2">出金</option>
 <option value="1">入金</option>
@@ -197,6 +197,8 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 <script>
 var API = '/account/rest';
 var accounts = [];
+var prevStartDate = '';
+var prevEndDate = '';
 var categoryChart = null;
 
 function showToast(msg, isError) {
@@ -268,8 +270,13 @@ function loadWaterData(){
     var now = new Date();
     var firstDay = new Date(now.getFullYear(),now.getMonth(),1);
     var lastDay = new Date(now.getFullYear(),now.getMonth()+1,0);
-    document.getElementById("startDate").value = fmtDate(firstDay);
-    document.getElementById("endDate").value = fmtDate(lastDay);
+    var sd = fmtDate(firstDay);
+    var ed = fmtDate(lastDay);
+    document.getElementById("startDate").value = sd;
+    document.getElementById("endDate").value = ed;
+    // 初始化上次日期
+    prevStartDate = sd;
+    prevEndDate = ed;
     loadAccountSelect();
     loadWaterList();
 }
@@ -333,6 +340,19 @@ async function loadWaterList(){
     var aid = document.getElementById("accountSelect").value;
     var sd = document.getElementById("startDate").value;
     var ed = document.getElementById("endDate").value;
+    
+    // 校验开始时间不能大于结束时间
+    if(sd && ed && sd > ed){
+        showToast("开始时间不能大于结束时间",true);
+        // 恢复之前的时间
+        document.getElementById("startDate").value = prevStartDate;
+        document.getElementById("endDate").value = prevEndDate;
+        return;
+    }
+    
+    // 保存当前时间为下一次恢复用
+    prevStartDate = sd;
+    prevEndDate = ed;
     
     // 转为本地日期字符串进行比较，避免时区问题
     var sdStr = sd ? sd : '';
