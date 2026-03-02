@@ -1,6 +1,6 @@
 package com.luxinx.config;
 
-import org.apache.tomcat.util.security.MD5Encoder;
+import java.security.MessageDigest;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
@@ -12,7 +12,21 @@ import java.io.IOException;
 public class LoginFilter implements Filter {
 
     // 正确的 token (admin123456 的 MD5)
-    private static final String VALID_TOKEN = MD5Encoder.encode(("admin" + "123456").getBytes());
+    private static final String VALID_TOKEN;
+    
+    static {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] bytes = md.digest(("admin" + "123456").getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            VALID_TOKEN = sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -106,19 +106,29 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
                 return "1";
             }
             
-            // 账户存在，按原逻辑删除
+            // 账户存在，按账户类型计算新余额
             Map<String, Object> accountMap = accountList.get(0);
             String prop = (String) accountMap.get("PROP");
             BigDecimal currentBalance = (BigDecimal) accountMap.get("BALANCE");
 
-            // 计算新余额：删除入金则减少余额，删除出金则增加余额
+            // 计算新余额
+            // 资产类型(PROP=1): 删除入金减少余额，删除出金增加余额
+            // 负债类型(PROP=2): 删除出金减少负债(余额增加)，删除入金增加负债(余额减少)
             BigDecimal newBalance = currentBalance;
             if ("1".equals(trtype)) {
-                // 入金（收入），删除时减去
-                newBalance = currentBalance.subtract(trnum);
+                // 入金
+                if ("2".equals(prop)) {
+                    newBalance = currentBalance.add(trnum); // 负债类型删除入金（还款）增加负债
+                } else {
+                    newBalance = currentBalance.subtract(trnum); // 资产类型删除入金减少余额
+                }
             } else if ("2".equals(trtype)) {
-                // 出金（支出），删除时加回
-                newBalance = currentBalance.add(trnum);
+                // 出金
+                if ("2".equals(prop)) {
+                    newBalance = currentBalance.subtract(trnum); // 负债类型删除出金（消费）减少负债
+                } else {
+                    newBalance = currentBalance.add(trnum); // 资产类型删除出金增加余额
+                }
             }
 
             // 删除流水
@@ -179,22 +189,36 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         if (trtype == null) trtype = "0";
         if (ifauto == null) ifauto = "0";
 
-        // 获取当前账户余额
+        // 获取当前账户余额和类型
         BigDecimal currentBalance = new BigDecimal("0");
+        String prop = "1"; // 默认为资产类型
         try {
-            Map<String, Object> accountMap = jdbcTemplate.queryForMap("SELECT BALANCE FROM T_ACCOUNT WHERE AID = ?", aid);
+            Map<String, Object> accountMap = jdbcTemplate.queryForMap("SELECT BALANCE, PROP FROM T_ACCOUNT WHERE AID = ?", aid);
             currentBalance = (BigDecimal) accountMap.get("BALANCE");
+            prop = (String) accountMap.get("PROP");
         } catch (Exception e) {
             // ignore
         }
 
         // 计算流水后的余额
+        // 资产类型( PROP=1 ): 入金增加，出金减少
+        // 负债类型( PROP=2 ): 入金减少，出金增加（信用卡消费相当于还款，额度增加）
         BigDecimal num = new BigDecimal(trnum);
         BigDecimal newBalance = currentBalance;
         if ("1".equals(trtype)) {
-            newBalance = currentBalance.add(num); // 入金增加余额
+            // 入金
+            if ("2".equals(prop)) {
+                newBalance = currentBalance.subtract(num); // 负债类型入金（还款）减少负债
+            } else {
+                newBalance = currentBalance.add(num); // 资产类型入金增加余额
+            }
         } else {
-            newBalance = currentBalance.subtract(num); // 出金减少余额
+            // 出金
+            if ("2".equals(prop)) {
+                newBalance = currentBalance.add(num); // 负债类型出金（消费）增加负债（额度减少）
+            } else {
+                newBalance = currentBalance.subtract(num); // 资产类型出金减少余额
+            }
         }
 
         // 插入流水记录，包含余额

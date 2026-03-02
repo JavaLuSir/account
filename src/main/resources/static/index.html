@@ -213,9 +213,23 @@ function doLogin(){
     var u = document.getElementById("username").value;
     var p = document.getElementById("password").value;
     if(u=="lu" && p=="Lx@12345678"){
-        localStorage.setItem("token","ok");
-        document.getElementById("loginPage").style.display = "none";
-        switchTab('water');
+        // 先调用登录接口获取 cookie
+        fetch(API+"/login", {credentials: "include"})
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                if(data.code == 0){
+                    localStorage.setItem("token","ok");
+                    document.getElementById("loginPage").style.display = "none";
+                    switchTab('water');
+                } else {
+                    showToast("登录失败",true);
+                }
+            })
+            .catch(function(){
+                showToast("登录失败",true);
+            });
     }else{
         showToast("用户名或密码错误",true);
     }

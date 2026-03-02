@@ -7,9 +7,7 @@ import com.luxinx.bean.BeanCategory;
 import com.luxinx.bean.BeanWater;
 import com.luxinx.cron.Tzcrond;
 import com.luxinx.service.ServiceDataAccount;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.MessageDigest;
 import java.util.*;
 
 /**
@@ -33,14 +32,35 @@ public class ControllerAccount {
     private Tzcrond tzcrond;
 
     @RequestMapping("/login")
-    public String dologin(HttpServletResponse response) throws IOException {
-        String md5key = MD5Encoder.encode(("admin" + "123456").getBytes());
-        Cookie cookie = new Cookie("token", md5key);
-        //cookie.setPath("/"); // 设置Cookie的路径
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 设置Cookie的有效期为7天
-        response.addCookie(cookie);
-        response.sendRedirect("../index.html");
-        return "redirect:/index.html";
+    public String dologin(HttpServletResponse response) {
+        // 生成 MD5 token
+        String md5key = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] bytes = md.digest(("admin" + "123456").getBytes("UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            md5key = sb.toString();
+        } catch (Exception e) {
+            md5key = "admin123456";
+        }
+        
+        try {
+            Cookie cookie = new Cookie("token", md5key);
+            cookie.setPath("/account");
+            cookie.setMaxAge(7 * 24 * 60 * 60);
+            cookie.setSecure(false);
+            cookie.setHttpOnly(false);
+            response.addCookie(cookie);
+            
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":0,\"msg\":\"登录成功\"}");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @RequestMapping("/list")
