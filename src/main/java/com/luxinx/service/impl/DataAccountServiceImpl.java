@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -20,7 +22,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
 
     @Override
     public List<BeanWater> queryAccountInfoById(String id) {
-        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,BALANCE,REMARK,UPDATETIME FROM T_WATER WHERE AID=? ORDER BY UPDATETIME DESC";
+        String sql = "SELECT WID,AID,TRDATE,TRADEKIND,TRTYPE,TRNUM,BALANCE,REMARK,UPDATETIME,CID FROM T_WATER WHERE AID=? ORDER BY UPDATETIME DESC";
         return jdbcTemplate.query(sql, new BeanWater(), id);
     }
 
@@ -247,7 +249,8 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
                 "SUM(CASE TRTYPE WHEN '1' THEN TRNUM ELSE 0 END) AS income, " +
                 "SUM(CASE TRTYPE WHEN '0' THEN -TRNUM ELSE TRNUM END) AS total " +
                 "FROM T_WATER T LEFT JOIN T_ACCOUNT A ON T.AID=A.AID " +
-                "WHERE (A.PROP='2' AND T.TRTYPE='0') OR A.PROP='1' " +
+                "WHERE ((A.PROP='2' AND T.TRTYPE='0') OR A.PROP='1') " +
+                "AND T.CID NOT IN (20, 21) " +
                 "GROUP BY months ORDER BY months DESC";
         return jdbcTemplate.queryForList(sql);
     }
@@ -257,6 +260,7 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
         String sql = "SELECT A.accname, T.wid, trdate, T.remark, T.trnum, T.trtype " +
                 "FROM T_WATER T LEFT JOIN T_ACCOUNT A ON T.AID=A.AID " +
                 "WHERE ((A.PROP='2' AND T.TRTYPE='0') OR A.PROP='1') " +
+                "AND T.CID NOT IN (20, 21) " +
                 "AND DATE_FORMAT(TRDATE,'%Y-%m') = ? ORDER BY T.UPDATETIME DESC";
         return jdbcTemplate.queryForList(sql, datestr);
     }
@@ -333,8 +337,105 @@ public class DataAccountServiceImpl implements ServiceDataAccount {
     public List<Map<String, Object>> queryCategoryStats(String datestr) {
         String sql = "SELECT c.CNAME as name, SUM(w.TRNUM) as value " +
                      "FROM T_WATER w LEFT JOIN T_CATEGORY c ON w.CID = c.CID " +
-                     "WHERE w.TRDATE LIKE ? AND w.TRTYPE = '2' " +
+                     "WHERE w.TRDATE LIKE ? AND w.TRTYPE = '2' AND w.CID NOT IN (20, 21) " +
                      "GROUP BY c.CNAME ORDER BY value DESC";
         return jdbcTemplate.queryForList(sql, datestr + "%");
+    }
+
+    @Override
+    @Transactional
+    public Map<String, String> transfer(String fromAid, String toAid, String amount, String trdate, String remark) {
+        Map<String, String> result = new HashMap<>();
+        
+        try {
+            BigDecimal num = new BigDecimal(amount);
+            if (num.compareTo(BigDecimal.ZERO) <= 0) {
+                result.put("code", "1");
+                result.put("msg", "转账金额必须大于0");
+                return result;
+            }
+
+            // 获取转出账户信息
+            Map<String, Object> fromAccount;
+            try {
+                fromAccount = jdbcTemplate.queryForMap("SELECT ACCNAME, BALANCE, PROP FROM T_ACCOUNT WHERE AID = ?", fromAid);
+            } catch (Exception e) {
+                result.put("code", "1");
+                result.put("msg", "转出账户不存在");
+                return result;
+            }
+
+            // 获取转入账户信息
+            Map<String, Object> toAccount;
+            try {
+                toAccount = jdbcTemplate.queryForMap("SELECT ACCNAME, BALANCE, PROP FROM T_ACCOUNT WHERE AID = ?", toAid);
+            } catch (Exception e) {
+                result.put("code", "1");
+                result.put("msg", "转入账户不存在");
+                return result;
+            }
+
+            String fromAccname = (String) fromAccount.get("ACCNAME");
+            String toAccname = (String) toAccount.get("ACCNAME");
+            BigDecimal fromBalance = (BigDecimal) fromAccount.get("BALANCE");
+            BigDecimal toBalance = (BigDecimal) toAccount.get("BALANCE");
+            String fromProp = (String) fromAccount.get("PROP");
+            String toProp = (String) toAccount.get("PROP");
+
+            // 计算转出后余额
+            BigDecimal newFromBalance = fromBalance;
+            if ("1".equals(fromProp)) {
+                // 资产类型出金减少余额
+                newFromBalance = fromBalance.subtract(num);
+            } else {
+                // 负债类型出金增加余额（信用卡出金相当于还款，额度恢复）
+                newFromBalance = fromBalance.add(num);
+            }
+
+            if (newFromBalance.compareTo(BigDecimal.ZERO) < 0) {
+                result.put("code", "1");
+                result.put("msg", "转出账户余额不足");
+                return result;
+            }
+
+            // 计算转入后余额
+            BigDecimal newToBalance = toBalance;
+            if ("1".equals(toProp)) {
+                // 资产类型入金增加余额
+                newToBalance = toBalance.add(num);
+            } else {
+                // 负债类型入金减少负债（信用卡入金相当于消费，额度减少）
+                newToBalance = toBalance.subtract(num);
+            }
+
+            // 获取当前时间
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            if (trdate == null || trdate.isEmpty()) {
+                trdate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            }
+
+            // 插入转出流水（出金，还款类别）
+            String sqlFrom = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,BALANCE,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO,CID) VALUES(?,?,'0','2',?,?,?,?,?,?,NOW(),NOW(),'0',20)";
+            jdbcTemplate.update(sqlFrom, fromAid, trdate, fromAid, fromAccname, num, newFromBalance, "转出到" + toAccname + (remark != null ? "：" + remark : ""), toAid);
+
+            // 插入转入流水（入金，还款类别）
+            String sqlTo = "INSERT INTO T_WATER (AID,TRDATE,TRADEKIND,TRTYPE,WACCOUNT,WACCNAME,TRNUM,BALANCE,REMARK,OPPID,CREATETIME,UPDATETIME,IFAUTO,CID) VALUES(?,?,'0','1',?,?,?,?,?,?,NOW(),NOW(),'0',21)";
+            jdbcTemplate.update(sqlTo, toAid, trdate, toAid, toAccname, num, newToBalance, "从" + fromAccname + "转入" + (remark != null ? "：" + remark : ""), fromAid);
+
+            // 更新转出账户余额
+            jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE = ? WHERE AID = ?", newFromBalance, fromAid);
+
+            // 更新转入账户余额
+            jdbcTemplate.update("UPDATE T_ACCOUNT SET BALANCE = ? WHERE AID = ?", newToBalance, toAid);
+
+            result.put("code", "0");
+            result.put("msg", "转账成功：" + fromAccname + " -> " + toAccname + " " + amount + "元");
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("code", "1");
+            result.put("msg", "转账失败: " + e.getMessage());
+            return result;
+        }
     }
 }

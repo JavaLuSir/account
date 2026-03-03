@@ -7,25 +7,25 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::        (v2.3.4.RELEASE)
 
-2026-02-28 20:21:56.601  INFO 615484 --- [           main] com.luxinx.account.AccountApplication    : Starting AccountApplication v0.0.1 on VM-24-16-opencloudos with PID 615484 (/root/account/target/account-0.0.1.jar started by root in /root/account)
-2026-02-28 20:21:56.606  INFO 615484 --- [           main] com.luxinx.account.AccountApplication    : No active profile set, falling back to default profiles: default
-2026-02-28 20:21:58.083  INFO 615484 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
-2026-02-28 20:21:58.099  INFO 615484 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12ms. Found 0 JDBC repository interfaces.
-2026-02-28 20:21:58.769  INFO 615484 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
-2026-02-28 20:21:58.780  INFO 615484 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-02-28 20:21:58.781  INFO 615484 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.38]
-2026-02-28 20:21:58.848  INFO 615484 --- [           main] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring embedded WebApplicationContext
-2026-02-28 20:21:58.849  INFO 615484 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2128 ms
-2026-02-28 20:21:58.863  INFO 615484 --- [           main] com.luxinx.config.DruidConfiguration     : init Druid Servlet Configuration
-2026-02-28 20:21:59.171  INFO 615484 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter webStatFilter was not registered (possibly already registered?)
-2026-02-28 20:21:59.173  INFO 615484 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Servlet statViewServlet was not registered (possibly already registered?)
-2026-02-28 20:21:59.449  INFO 615484 --- [           main] com.alibaba.druid.pool.DruidDataSource   : {dataSource-1} inited
-2026-02-28 20:21:59.868  INFO 615484 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
-2026-02-28 20:21:59.982  INFO 615484 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-02-28 20:22:00.352  INFO 615484 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
-2026-02-28 20:22:00.368  INFO 615484 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
-2026-02-28 20:22:00.459  INFO 615484 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path '/account'
-2026-02-28 20:22:00.506  INFO 615484 --- [           main] com.luxinx.account.AccountApplication    : Started AccountApplication in 4.626 seconds (JVM running for 5.202)
-2026-02-28 20:26:21.750  INFO 615484 --- [nio-8080-exec-1] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-02-28 20:26:21.750  INFO 615484 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-02-28 20:26:21.758  INFO 615484 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 8 ms
+2026-03-03 10:56:16.144  INFO 1614880 --- [           main] com.luxinx.account.AccountApplication    : Starting AccountApplication v0.0.1 on VM-24-16-opencloudos with PID 1614880 (/root/account/target/account-0.0.1.jar started by root in /root/account)
+2026-03-03 10:56:16.153  INFO 1614880 --- [           main] com.luxinx.account.AccountApplication    : No active profile set, falling back to default profiles: default
+2026-03-03 10:56:17.785  INFO 1614880 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
+2026-03-03 10:56:17.808  INFO 1614880 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 14ms. Found 0 JDBC repository interfaces.
+2026-03-03 10:56:18.453  INFO 1614880 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2026-03-03 10:56:18.464  INFO 1614880 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-03 10:56:18.464  INFO 1614880 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.38]
+2026-03-03 10:56:18.526  INFO 1614880 --- [           main] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring embedded WebApplicationContext
+2026-03-03 10:56:18.527  INFO 1614880 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2221 ms
+2026-03-03 10:56:18.535  INFO 1614880 --- [           main] com.luxinx.config.DruidConfiguration     : init Druid Servlet Configuration
+2026-03-03 10:56:18.775  INFO 1614880 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Filter webStatFilter was not registered (possibly already registered?)
+2026-03-03 10:56:18.777  INFO 1614880 --- [           main] o.s.boot.web.servlet.RegistrationBean    : Servlet statViewServlet was not registered (possibly already registered?)
+2026-03-03 10:56:19.146  INFO 1614880 --- [           main] com.alibaba.druid.pool.DruidDataSource   : {dataSource-1} inited
+2026-03-03 10:56:19.651  INFO 1614880 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2026-03-03 10:56:19.837  INFO 1614880 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-03-03 10:56:20.809  INFO 1614880 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2026-03-03 10:56:20.848  INFO 1614880 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-03-03 10:56:21.047  INFO 1614880 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path '/account'
+2026-03-03 10:56:21.075  INFO 1614880 --- [           main] com.luxinx.account.AccountApplication    : Started AccountApplication in 5.623 seconds (JVM running for 6.275)
+2026-03-03 10:56:26.848  INFO 1614880 --- [nio-8080-exec-1] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-03 10:56:26.849  INFO 1614880 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-03 10:56:26.858  INFO 1614880 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 9 ms

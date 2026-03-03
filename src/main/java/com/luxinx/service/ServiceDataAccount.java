@@ -151,4 +151,15 @@ public interface ServiceDataAccount {
      * 查询类别统计
      */
     List<Map<String, Object>> queryCategoryStats(String datestr);
+
+    /**
+     * 转账功能
+     * @param fromAid 转出账户ID
+     * @param toAid 转入账户ID
+     * @param amount 转账金额
+     * @param trdate 交易日期
+     * @param remark 备注
+     * @return 操作结果
+     */
+    Map<String, String> transfer(String fromAid, String toAid, String amount, String trdate, String remark);
 }

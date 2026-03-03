@@ -410,10 +410,16 @@ async function loadWaterList(){
             data = data.filter(function(w){return w.aid == aid;});
         }
         
+        // 过滤还款类型（不计入收支统计，但列表显示）
+        var dataForStats = data.filter(function(w){
+            var cid = parseInt(w.cid) || 0;
+            return cid !== 20 && cid !== 21;
+        });
+        
         // 计算收入和支出
         var totalIncome = 0;
         var totalExpense = 0;
-        data.forEach(function(w){
+        dataForStats.forEach(function(w){
             if(w.trtype=="1"){
                 totalIncome += parseFloat(w.trnum)||0;
             }else{
@@ -423,9 +429,9 @@ async function loadWaterList(){
         document.getElementById("totalIncome").textContent = fmtMoney(totalIncome);
         document.getElementById("totalExpense").textContent = fmtMoney(totalExpense);
         
-        // 更新图表 - 根据当前筛选数据，显示出入金
+        // 更新图表 - 使用过滤后的数据
         var expenseData = {};
-        data.forEach(function(w){
+        dataForStats.forEach(function(w){
             var catName = categoryMap[w.cid] || "其他";
             var key = catName;
             expenseData[key] = (expenseData[key]||0) + (parseFloat(w.trnum)||0);

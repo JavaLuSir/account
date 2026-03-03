@@ -260,4 +260,16 @@ public class ControllerAccount {
         serviceDataAccount.resetDate();
         return "{msg:'操作成功'}";
     }
+
+    @RequestMapping("/transfer")
+    public String transfer(@RequestBody Map<String, String> reqparam) {
+        String fromAid = reqparam.get("fromAid");
+        String toAid = reqparam.get("toAid");
+        String amount = reqparam.get("amount");
+        String trdate = reqparam.get("trdate");
+        String remark = reqparam.get("remark");
+
+        Map<String, String> result = serviceDataAccount.transfer(fromAid, toAid, amount, trdate, remark);
+        return JSONObject.toJSONString(result);
+    }
 }
