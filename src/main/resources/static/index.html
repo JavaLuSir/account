@@ -30,10 +30,13 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 .toast{position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;color:#fff;font-weight:500;background:#333;display:none}
 .toast.success{background:#28a745}
 .toast.error{background:#dc3545}
+.toast.info{background:#333}
+.water-info-popup{position:fixed;z-index:99999;background:#333;color:#fff;padding:15px;border-radius:8px;max-width:280px;line-height:1.6;font-size:14px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
+<div id="waterPopup" class="water-info-popup"></div>
 
 <div id="loginPage">
 <div class="login-card">
@@ -209,6 +212,16 @@ function showToast(msg, isError) {
     setTimeout(function(){toast.style.display = 'none'},3000);
 }
 
+function showWaterInfo(info) {
+    var popup = document.getElementById('waterPopup');
+    popup.textContent = info;
+    popup.style.display = 'block';
+    popup.style.top = '50%';
+    popup.style.left = '50%';
+    popup.style.transform = 'translate(-50%, -50%)';
+    setTimeout(function(){popup.style.display = 'none'},3000);
+}
+
 function doLogin(){
     var u = document.getElementById("username").value;
     var p = document.getElementById("password").value;
@@ -374,6 +387,12 @@ async function loadWaterList(){
     
     try{
         
+        // 获取账户列表
+        var r0 = await fetch(API+"/account");
+        var accountList = await r0.json();
+        var accountMap = {};
+        accountList.forEach(function(a){accountMap[a.aid] = {name: a.accname, balance: a.balance};});
+        
         var r = await fetch(API+"/waterall");
         var data = await r.json();
          
@@ -457,7 +476,7 @@ async function loadWaterList(){
             }
             categoryChart = echarts.init(chartDom);
             categoryChart.setOption({
-                tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+                tooltip:{trigger:'item',formatter:function(params){return params.name + ': ¥' + params.value.toFixed(2) + ' (' + params.percent.toFixed(1) + '%)';}},
                 series:[{type:'pie',radius:['40%','70%'],data:chartData}]
             });
         }
@@ -465,7 +484,9 @@ async function loadWaterList(){
         var html = data.map(function(w){
             var t = categoryMap[w.cid] || (w.trtype=="1"?"入金":"出金");
             var c = w.trtype=="1"?"positive":"negative";
-            return "<tr><td>"+fmtDate(w.trdate)+"</td><td>"+t+"</td><td class='"+c+"'>"+fmtMoney(w.trnum)+"</td><td>"+(w.remark||"")+"</td><td><button class='btn btn-sm' onclick='delWater("+w.wid+")'>×</button></td></tr>";
+            var accInfo = accountMap[w.aid] || {name: "未知账户", balance: 0};
+            var info = "账户: " + accInfo.name + "，余额: " + fmtMoney(accInfo.balance) + (w.remark ? "，备注: " + w.remark : "");
+            return '<tr style="cursor:pointer" onclick="showWaterInfo(\''+info+'\')"><td>'+fmtDate(w.trdate)+'</td><td>'+t+'</td><td class="'+c+'">'+fmtMoney(w.trnum)+'</td><td>'+(w.remark||'')+'</td><td><button class="btn btn-sm" onclick="delWater('+w.wid+')">×</button></td></tr>';
         }).join("");
         document.querySelector("#waterTable tbody").innerHTML = html || '<tr><td colspan="4" class="text-center text-muted">暂无流水</td></tr>';
     }catch(e){
@@ -495,7 +516,7 @@ async function loadCategoryStats(){
             categoryChart = echarts.init(chartDom);
         }
         categoryChart.setOption({
-            tooltip:{trigger:'item',formatter:'{b}: ¥{c} ({d}%)'},
+            tooltip:{trigger:'item',formatter:function(params){return params.name + ': ¥' + params.value.toFixed(2) + ' (' + params.percent.toFixed(1) + '%)';}},
             series:[{type:'pie',radius:['40%','70%'],data:chartData}]
         });
     }catch(e){
