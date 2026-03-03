@@ -395,6 +395,9 @@ async function loadWaterList(){
         
         var r = await fetch(API+"/waterall");
         var data = await r.json();
+        
+        // 按交易日期倒序排列
+        data.sort(function(a, b){return new Date(b.trdate) - new Date(a.trdate);});
          
         
         // 获取类别数据
