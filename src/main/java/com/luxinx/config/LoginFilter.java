@@ -61,6 +61,7 @@ public class LoginFilter implements Filter {
             if (token == null || !token.equals(VALID_TOKEN)) {
                 httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 httpResponse.setContentType("application/json;charset=UTF-8");
+                httpResponse.setHeader("X-Redirect-Login", "true");  // 告诉前端跳转到登录页
                 httpResponse.getWriter().write("{\"code\":401,\"msg\":\"未登录，请先登录\"}");
                 return;
             }

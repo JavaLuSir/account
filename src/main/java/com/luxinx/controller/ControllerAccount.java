@@ -50,7 +50,7 @@ public class ControllerAccount {
         try {
             Cookie cookie = new Cookie("token", md5key);
             cookie.setPath("/account");
-            cookie.setMaxAge(7 * 24 * 60 * 60);
+            cookie.setMaxAge(30 * 24 * 60 * 60);  // 30天
             cookie.setSecure(false);
             cookie.setHttpOnly(false);
             response.addCookie(cookie);
