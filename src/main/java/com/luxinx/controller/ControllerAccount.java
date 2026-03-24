@@ -37,7 +37,7 @@ public class ControllerAccount {
         String md5key = "";
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(("admin" + "123456").getBytes("UTF-8"));
+            byte[] bytes = md.digest(("lu" + "Lx@12345678").getBytes("UTF-8"));
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
                 sb.append(String.format("%02x", b));

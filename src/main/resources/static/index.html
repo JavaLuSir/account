@@ -311,7 +311,7 @@ function loadWaterData(){
 
 async function loadDashboard(){
     try{
-        var r = await fetch(API+"/account");
+        var r = await fetch(API+"/account", {credentials: "include"});
         accounts = await r.json();
         var ta = 0, td = 0;
         accounts.forEach(function(a){
@@ -338,7 +338,7 @@ async function loadDashboard(){
 
 async function loadAccounts(){
     try{
-        var r = await fetch(API+"/account");
+        var r = await fetch(API+"/account", {credentials: "include"});
         accounts = await r.json();
         var html = accounts.map(function(a){
             var bal = parseFloat(a.balance)||0;
@@ -352,7 +352,7 @@ async function loadAccounts(){
 
 async function loadAccountSelect(){
     try{
-        var r = await fetch(API+"/account");
+        var r = await fetch(API+"/account", {credentials: "include"});
         accounts = await r.json();
         var html = '<option value="all">全部账户</option>' + accounts.map(function(a){return '<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
         document.getElementById("accountSelect").innerHTML = html;
@@ -389,12 +389,12 @@ async function loadWaterList(){
     try{
         
         // 获取账户列表
-        var r0 = await fetch(API+"/account");
+        var r0 = await fetch(API+"/account", {credentials: "include"});
         var accountList = await r0.json();
         var accountMap = {};
         accountList.forEach(function(a){accountMap[a.aid] = {name: a.accname, balance: a.balance};});
         
-        var r = await fetch(API+"/waterall");
+        var r = await fetch(API+"/waterall", {credentials: "include"});
         var data = await r.json();
         
         // 按交易日期倒序排列
@@ -403,12 +403,12 @@ async function loadWaterList(){
         
         // 获取类别数据
         
-        var r1 = await fetch(API+"/category?ctype=2");
+        var r1 = await fetch(API+"/category?ctype=2", {credentials: "include"});
         var categories = await r1.json();
         var categoryMap = {};
         categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
         // 也获取入金类别
-        var r2 = await fetch(API+"/category?ctype=1");
+        var r2 = await fetch(API+"/category?ctype=1", {credentials: "include"});
         var categories2 = await r2.json();
         categories2.forEach(function(c){categoryMap[c.cid] = c.cname;});
          
@@ -502,11 +502,11 @@ async function loadCategoryStats(){
     var now = new Date();
     var datestr = now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0");
     try{
-        var r = await fetch(API+"/categorystats?datestr="+datestr);
+        var r = await fetch(API+"/categorystats?datestr="+datestr, {credentials: "include"});
         var data = await r.json();
         
         // 获取类别数据
-        var r1 = await fetch(API+"/category?ctype=2");
+        var r1 = await fetch(API+"/category?ctype=2", {credentials: "include"});
         var categories = await r1.json();
         var categoryMap = {};
         categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
@@ -547,11 +547,11 @@ function closeModal(id){
 async function loadCategories(){
     try{
         var type = document.getElementById("waterTypeSelect").value;
-        var r = await fetch(API+"/category?ctype="+type);
+        var r = await fetch(API+"/category?ctype="+type, {credentials: "include"});
         var data = await r.json();
         
         // 获取类别数据
-        var r1 = await fetch(API+"/category?ctype=2");
+        var r1 = await fetch(API+"/category?ctype=2", {credentials: "include"});
         var categories = await r1.json();
         var categoryMap = {};
         categories.forEach(function(c){categoryMap[c.cid] = c.cname;});
@@ -585,7 +585,7 @@ async function addAccount(){
     document.body.appendChild(mask);
     
     try{
-        await fetch(API+"/addaccount",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+        await fetch(API+"/addaccount", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}));
         closeModal('addAccountModal');
         showToast("添加成功",false);
         loadAccounts();
@@ -619,7 +619,7 @@ async function addWater(){
     document.body.appendChild(mask);
     
     try{
-        await fetch(API+"/adddetail",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
+        await fetch(API+"/adddetail", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}));
         closeModal('addWaterModal');
         showToast("添加成功",false);
         loadWaterList();
@@ -634,7 +634,7 @@ async function addWater(){
 async function delWater(id){
     if(!confirm("确定删除"))return;
     try{
-        await fetch(API+"/deldetail?id="+id);
+        await fetch(API+"/deldetail?id="+id, {credentials: "include"});
         loadWaterList();
         loadDashboard();
         showToast("删除成功",false);
@@ -646,7 +646,7 @@ async function delWater(id){
 async function delAccount(id){
     if(!confirm("确定删除该账户？"))return;
     try{
-        await fetch(API+"/delaccount?id="+id);
+        await fetch(API+"/delaccount?id="+id, {credentials: "include"});
         loadDashboard();
         showToast("删除成功",false);
     }catch(e){

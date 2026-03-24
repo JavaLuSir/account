@@ -11,13 +11,13 @@ import java.io.IOException;
 //@Component  // 在 WebConfig 中手动注册
 public class LoginFilter implements Filter {
 
-    // 正确的 token (admin123456 的 MD5)
+    // 正确的 token (luLx@12345678 的 MD5)
     private static final String VALID_TOKEN;
     
     static {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(("admin" + "123456").getBytes("UTF-8"));
+            byte[] bytes = md.digest(("lu" + "Lx@12345678").getBytes("UTF-8"));
             StringBuilder sb = new StringBuilder();
             for (byte b : bytes) {
                 sb.append(String.format("%02x", b));
