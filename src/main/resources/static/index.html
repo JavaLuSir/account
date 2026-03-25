@@ -585,7 +585,7 @@ async function addAccount(){
     document.body.appendChild(mask);
     
     try{
-        await fetch(API+"/addaccount", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}));
+        await fetch(API+"/addaccount", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
         closeModal('addAccountModal');
         showToast("添加成功",false);
         loadAccounts();
@@ -619,7 +619,7 @@ async function addWater(){
     document.body.appendChild(mask);
     
     try{
-        await fetch(API+"/adddetail", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}));
+        await fetch(API+"/adddetail", {credentials: "include", method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)});
         closeModal('addWaterModal');
         showToast("添加成功",false);
         loadWaterList();
