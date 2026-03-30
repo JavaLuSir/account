@@ -3,7 +3,7 @@ server:
     key-store: classpath:account.jks
     key-store-password: changeit
     key-store-type: JKS
-    enabled: true
+    enabled: false
   port: 8080
   servlet:
     context-path: /account

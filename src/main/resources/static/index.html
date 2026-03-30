@@ -35,6 +35,8 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 .water-info-popup{position:fixed;z-index:99999;background:#333;color:#fff;padding:15px;border-radius:8px;max-width:280px;line-height:1.6;font-size:14px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
 .page-loading-mask{position:fixed;inset:0;z-index:20000;background:rgba(15,23,42,0.72);display:flex;align-items:center;justify-content:center;transition:opacity .25s ease}
 .page-loading-content{background:#fff;border-radius:12px;padding:18px 22px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);color:#333;font-weight:500}
+.water-loading-mask{position:fixed;inset:0;z-index:15000;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center}
+.water-loading-content{background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);color:#333;font-weight:500}
 </style>
 </head>
 <body>
@@ -42,6 +44,12 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 <div class="page-loading-content">
 <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
 <span>页面加载中...</span>
+</div>
+</div>
+<div id="waterLoadingMask" class="water-loading-mask">
+<div class="water-loading-content">
+<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+<span>加载流水中...</span>
 </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -231,6 +239,16 @@ function showWaterInfo(info) {
     setTimeout(function(){popup.style.display = 'none'},3000);
 }
 
+function showWaterLoadingMask(){
+    var mask = document.getElementById("waterLoadingMask");
+    if(mask) mask.style.display = "flex";
+}
+
+function hideWaterLoadingMask(){
+    var mask = document.getElementById("waterLoadingMask");
+    if(mask) mask.style.display = "none";
+}
+
 function doLogin(){
     var u = document.getElementById("username").value;
     var p = document.getElementById("password").value;
@@ -394,6 +412,7 @@ async function loadWaterList(){
     var sdStr = sd ? sd : '';
     var edStr = ed ? ed : '';
     
+    showWaterLoadingMask();
     try{
         
         // 获取账户列表
@@ -503,6 +522,8 @@ async function loadWaterList(){
         document.querySelector("#waterTable tbody").innerHTML = html || '<tr><td colspan="4" class="text-center text-muted">暂无流水</td></tr>';
     }catch(e){
         console.error('loadWaterList error:', e);
+    }finally{
+        hideWaterLoadingMask();
     }
 }
 
