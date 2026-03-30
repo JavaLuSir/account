@@ -33,9 +33,17 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 .toast.error{background:#dc3545}
 .toast.info{background:#333}
 .water-info-popup{position:fixed;z-index:99999;background:#333;color:#fff;padding:15px;border-radius:8px;max-width:280px;line-height:1.6;font-size:14px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.page-loading-mask{position:fixed;inset:0;z-index:20000;background:rgba(15,23,42,0.72);display:flex;align-items:center;justify-content:center;transition:opacity .25s ease}
+.page-loading-content{background:#fff;border-radius:12px;padding:18px 22px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);color:#333;font-weight:500}
 </style>
 </head>
 <body>
+<div id="pageLoadingMask" class="page-loading-mask">
+<div class="page-loading-content">
+<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+<span>页面加载中...</span>
+</div>
+</div>
 <div id="toast" class="toast"></div>
 <div id="waterPopup" class="water-info-popup"></div>
 
@@ -663,6 +671,17 @@ if(token){
     document.getElementById("loginPage").style.display = "none";
     switchTab('water');
 }
+
+function hidePageLoadingMask() {
+    var mask = document.getElementById("pageLoadingMask");
+    if (!mask) return;
+    mask.style.opacity = "0";
+    setTimeout(function(){ mask.style.display = "none"; }, 260);
+}
+
+window.addEventListener("load", function(){
+    setTimeout(hidePageLoadingMask, 120);
+});
 </script>
 </body>
 </html>
