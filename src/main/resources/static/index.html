@@ -88,10 +88,17 @@ html,body{margin:0;padding:0;height:100%;font-size:14px;background:#f5f7fa}
 </div>
 </div>
 
-<div class="mb-2">
-<select class="form-select form-select-sm" id="accountSelect" onchange="loadWaterList()">
-<option value="all">全部账户</option>
-</select>
+<div class="row g-1 mb-2">
+  <div class="col-6">
+    <select class="form-select form-select-sm" id="accountSelect" onchange="loadWaterList()">
+    <option value="all">全部账户</option>
+    </select>
+  </div>
+  <div class="col-6">
+    <select class="form-select form-select-sm" id="categoryFilterSelect" onchange="loadWaterList()">
+    <option value="all">全部类别</option>
+    </select>
+  </div>
 </div>
 <div class="row g-2 mb-2">
 <div class="col-6">
@@ -220,6 +227,7 @@ var accounts = [];
 var prevStartDate = '';
 var prevEndDate = '';
 var categoryChart = null;
+var allCategories = [];
 
 function showToast(msg, isError) {
     var toast = document.getElementById('toast');
@@ -383,6 +391,15 @@ async function loadAccountSelect(){
         var html = '<option value="all">全部账户</option>' + accounts.map(function(a){return '<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
         document.getElementById("accountSelect").innerHTML = html;
         document.getElementById("waterAccountSelect").innerHTML = '<option value="">选择账户</option>' + accounts.map(function(a){return '<option value="'+a.aid+'">'+a.accname+'</option>'}).join("");
+        
+        // 加载所有类别用于筛选
+        var r1 = await fetch(API+"/category?ctype=2", {credentials: "include"});
+        var categories = await r1.json();
+        var r2 = await fetch(API+"/category?ctype=1", {credentials: "include"});
+        var categories2 = await r2.json();
+        allCategories = categories.concat(categories2);
+        var categoryHtml = '<option value="all">全部类别</option>' + allCategories.map(function(c){return '<option value="'+c.cid+'">'+c.cname+'</option>'}).join("");
+        document.getElementById("categoryFilterSelect").innerHTML = categoryHtml;
     }catch(e){
         console.error(e);
     }
@@ -392,6 +409,7 @@ async function loadWaterList(){
     
     
     var aid = document.getElementById("accountSelect").value;
+    var cid = document.getElementById("categoryFilterSelect").value;
     var sd = document.getElementById("startDate").value;
     var ed = document.getElementById("endDate").value;
     
@@ -458,6 +476,12 @@ async function loadWaterList(){
         // 过滤账户
         if(aid && aid != "all"){
             data = data.filter(function(w){return w.aid == aid;});
+        }
+        
+        // 过滤类别
+        if(cid && cid != "all"){
+            var cidNum = parseInt(cid);
+            data = data.filter(function(w){return parseInt(w.cid) == cidNum;});
         }
         
         // 过滤还款类型（不计入收支统计，但列表显示）
